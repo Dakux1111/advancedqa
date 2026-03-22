@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Pro Academy — Senior Level</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06070d;
+  --s1: #0d0f1a;
+  --s2: #131525;
+  --s3: #1a1d30;
+  --s4: #22263d;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --cyan: #00e5ff;
+  --green: #00ff9d;
+  --amber: #ffb700;
+  --red: #ff4d6d;
+  --purple: #b57bee;
+  --blue: #4d9fff;
+  --text: #eef0ff;
+  --text2: #8a8faa;
+  --text3: #454a66;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* noise overlay */
+body::after {
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.4;
+}
+
+/* ── LAYOUT ── */
+#shell { display:flex; min-height:100vh; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width:260px; min-height:100vh;
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:fixed; top:0; left:0; z-index:100;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+
+.sb-logo {
+  padding:24px 20px 18px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo-mark {
+  display:flex; align-items:center; gap:10px;
+}
+
+.logo-hex {
+  width:38px; height:38px;
+  background:linear-gradient(135deg,var(--cyan),var(--green));
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+  box-shadow:0 0 24px rgba(0,229,255,.3);
+}
+
+.logo-text {
+  font-family:var(--font-display);
+  font-size:22px; letter-spacing:2px;
+  color:var(--text); line-height:1;
+}
+
+.logo-sub {
+  font-size:10px; color:var(--text3);
+  letter-spacing:1px; text-transform:uppercase;
+  margin-top:3px; font-family:var(--font-mono);
+}
+
+/* global progress */
+.sb-progress {
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.sp-row {
+  display:flex; justify-content:space-between;
+  font-size:11px; color:var(--text3);
+  font-family:var(--font-mono); margin-bottom:8px;
+  text-transform:uppercase; letter-spacing:.8px;
+}
+
+.sp-pct { color:var(--cyan); font-weight:700; }
+
+.pbar { height:3px; background:var(--s4); border-radius:99px; overflow:hidden; }
+.pbar-fill {
+  height:100%; border-radius:99px;
+  background:linear-gradient(90deg,var(--cyan),var(--green));
+  box-shadow:0 0 8px rgba(0,229,255,.5);
+  transition:width .6s ease;
+}
+
+/* nav */
+.sb-nav { flex:1; overflow-y:auto; padding:12px 0; }
+.sb-nav::-webkit-scrollbar { width:3px; }
+.sb-nav::-webkit-scrollbar-thumb { background:var(--s4); border-radius:2px; }
+
+.nav-group-label {
+  font-size:9px; color:var(--text3);
+  text-transform:uppercase; letter-spacing:2px;
+  padding:10px 20px 4px;
+  font-family:var(--font-mono);
+}
+
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 20px; cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;
+  position:relative;
+}
+
+.nav-item:hover { background:var(--s2); }
+.nav-item.active { background:rgba(0,229,255,.05); border-left-color:var(--cyan); }
+.nav-item.done .ni-dot { background:var(--green); box-shadow:0 0 6px rgba(0,255,157,.4); }
+.nav-item.locked { opacity:.35; cursor:not-allowed; }
+
+.ni-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--s4); flex-shrink:0; transition:all .3s;
+}
+.nav-item.active .ni-dot { background:var(--cyan); box-shadow:0 0 6px rgba(0,229,255,.5); }
+
+.ni-label { font-size:13px; color:var(--text2); flex:1; line-height:1.3; }
+.nav-item.active .ni-label { color:var(--text); }
+
+.ni-tag {
+  font-size:9px; font-family:var(--font-mono);
+  padding:2px 6px; border-radius:3px;
+  background:var(--s4); color:var(--text3);
+}
+.nav-item.done .ni-tag { background:rgba(0,255,157,.1); color:var(--green); }
+.nav-item.active .ni-tag { background:rgba(0,229,255,.1); color:var(--cyan); }
+
+.sb-footer {
+  padding:14px 20px;
+  border-top:1px solid var(--border);
+  font-size:11px; color:var(--text3);
+  font-family:var(--font-mono);
+  text-align:center;
+}
+
+/* ── MAIN ── */
+#main {
+  margin-left:260px;
+  flex:1; min-height:100vh;
+  display:flex; flex-direction:column;
+}
+
+/* topbar */
+#topbar {
+  position:sticky; top:0; z-index:50;
+  background:rgba(6,7,13,.85);
+  backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--border);
+  padding:12px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.tb-crumb {
+  font-family:var(--font-mono); font-size:12px;
+  color:var(--text3);
+}
+.tb-crumb span { color:var(--text); }
+
+.tb-right { display:flex; gap:10px; align-items:center; }
+
+.chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:4px;
+  font-size:11px; font-family:var(--font-mono);
+  border:1px solid var(--border);
+  background:var(--s2); color:var(--text2);
+  cursor:pointer; transition:all .15s;
+}
+.chip:hover { border-color:var(--cyan); color:var(--cyan); }
+.chip.primary {
+  background:var(--cyan); color:var(--bg);
+  border-color:var(--cyan); font-weight:700;
+}
+.chip.primary:hover { box-shadow:0 0 16px rgba(0,229,255,.4); }
+
+/* ── CONTENT ── */
+#content {
+  padding:44px 48px;
+  max-width:960px;
+  animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* MODULE HEADER */
+.mod-eyebrow {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:16px;
+}
+
+.eyebrow-tag {
+  font-family:var(--font-mono); font-size:10px;
+  color:var(--cyan); background:rgba(0,229,255,.08);
+  border:1px solid rgba(0,229,255,.2);
+  padding:3px 10px; border-radius:3px;
+  text-transform:uppercase; letter-spacing:1.5px;
+}
+
+.eyebrow-level {
+  font-family:var(--font-mono); font-size:10px;
+  color:var(--amber); background:rgba(255,183,0,.08);
+  border:1px solid rgba(255,183,0,.2);
+  padding:3px 10px; border-radius:3px;
+}
+
+.mod-title {
+  font-family:var(--font-display);
+  font-size:52px; letter-spacing:3px;
+  line-height:1; margin-bottom:12px;
+  color:var(--text);
+}
+
+.mod-title .hl { color:var(--cyan); }
+.mod-title .hl2 { color:var(--green); }
+.mod-title .hl3 { color:var(--amber); }
+
+.mod-desc {
+  font-size:15px; color:var(--text2); line-height:1.7;
+  max-width:620px; margin-bottom:6px;
+}
+
+.mod-meta {
+  display:flex; gap:16px; flex-wrap:wrap;
+  font-family:var(--font-mono); font-size:11px; color:var(--text3);
+  margin-top:10px;
+}
+
+.meta-item { display:flex; align-items:center; gap:5px; }
+.meta-item span { color:var(--text2); }
+
+.divider { height:1px; background:var(--border); margin:32px 0; }
+
+/* ── CARDS ── */
+.card {
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:22px 24px;
+  margin-bottom:16px;
+  transition:border-color .2s;
+}
+.card:hover { border-color:var(--border2); }
+
+.card-cyan { border-left:2px solid var(--cyan); background:linear-gradient(135deg,rgba(0,229,255,.03),var(--s1)); }
+.card-green { border-left:2px solid var(--green); background:linear-gradient(135deg,rgba(0,255,157,.03),var(--s1)); }
+.card-amber { border-left:2px solid var(--amber); background:linear-gradient(135deg,rgba(255,183,0,.03),var(--s1)); }
+.card-red { border-left:2px solid var(--red); background:linear-gradient(135deg,rgba(255,77,109,.03),var(--s1)); }
+.card-purple { border-left:2px solid var(--purple); background:linear-gradient(135deg,rgba(181,123,238,.03),var(--s1)); }
+
+.card-title {
+  font-family:var(--font-body); font-weight:700;
+  font-size:15px; color:var(--text);
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:12px;
+}
+
+.card p, .card li {
+  font-size:14px; color:var(--text2); line-height:1.75;
+}
+
+.card ul { list-style:none; padding:0; }
+.card ul li { padding:3px 0 3px 14px; position:relative; }
+.card ul li::before { content:'›'; position:absolute; left:0; color:var(--cyan); }
+
+/* ── TABLES ── */
+.tbl {
+  width:100%; border-collapse:collapse;
+  font-size:13px; margin:10px 0;
+}
+.tbl th {
+  text-align:left; padding:9px 14px;
+  background:var(--s2); color:var(--text3);
+  font-family:var(--font-mono); font-size:10px;
+  text-transform:uppercase; letter-spacing:1px;
+  border-bottom:1px solid var(--border);
+  font-weight:500;
+}
+.tbl td {
+  padding:10px 14px; border-bottom:1px solid var(--border);
+  color:var(--text2); line-height:1.5; vertical-align:top;
+}
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:rgba(255,255,255,.01); }
+
+/* ── PILLS ── */
+.pill {
+  display:inline-block; padding:2px 9px; border-radius:3px;
+  font-size:11px; font-family:var(--font-mono); margin:2px;
+}
+.p-cyan { background:rgba(0,229,255,.1); color:var(--cyan); border:1px solid rgba(0,229,255,.2); }
+.p-green { background:rgba(0,255,157,.1); color:var(--green); border:1px solid rgba(0,255,157,.2); }
+.p-amber { background:rgba(255,183,0,.1); color:var(--amber); border:1px solid rgba(255,183,0,.2); }
+.p-red { background:rgba(255,77,109,.1); color:var(--red); border:1px solid rgba(255,77,109,.2); }
+.p-purple { background:rgba(181,123,238,.1); color:var(--purple); border:1px solid rgba(181,123,238,.2); }
+.p-blue { background:rgba(77,159,255,.1); color:var(--blue); border:1px solid rgba(77,159,255,.2); }
+
+/* ── CODE ── */
+.code {
+  background:#050609;
+  border:1px solid var(--border);
+  border-radius:8px; padding:18px 20px;
+  font-family:var(--font-mono); font-size:12.5px;
+  line-height:1.8; color:var(--text2);
+  overflow-x:auto; margin:12px 0;
+  position:relative;
+}
+.code-label {
+  position:absolute; top:10px; right:14px;
+  font-size:10px; color:var(--text3); letter-spacing:1px;
+}
+.kw{color:#c792ea} .fn{color:var(--cyan)} .str{color:var(--green)}
+.num{color:var(--amber)} .cm{color:var(--text3)} .key{color:var(--blue)}
+.ok{color:var(--green)} .err{color:var(--red)} .hl-line{background:rgba(0,229,255,.06);display:block;margin:0 -20px;padding:0 20px;}
+
+/* ── ACCORDION ── */
+.acc {
+  border:1px solid var(--border); border-radius:10px;
+  margin-bottom:12px; overflow:hidden;
+  background:var(--s1);
+}
+
+.acc-head {
+  padding:15px 20px; cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center;
+  transition:background .15s; user-select:none;
+}
+.acc-head:hover { background:var(--s2); }
+.acc.open .acc-head { background:var(--s2); border-bottom:1px solid var(--border); }
+
+.acc-title {
+  font-weight:600; font-size:14px; color:var(--text);
+  display:flex; align-items:center; gap:10px;
+}
+
+.acc-arrow { color:var(--text3); font-size:11px; transition:transform .25s; }
+.acc.open .acc-arrow { transform:rotate(180deg); }
+
+.acc-body { display:none; padding:20px 22px; }
+.acc.open .acc-body { display:block; animation:fadeUp .2s ease; }
+
+/* ── STATUS GRID ── */
+.status-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px; margin:10px 0;
+}
+.sc {
+  padding:14px 16px; border-radius:8px;
+  border:1px solid var(--border); background:var(--s2);
+  transition:transform .2s;
+}
+.sc:hover { transform:translateY(-2px); }
+.sc-code { font-family:var(--font-display); font-size:28px; letter-spacing:2px; }
+.sc-name { font-size:11px; color:var(--text3); margin-top:2px; font-family:var(--font-mono); }
+.sc-desc { font-size:12px; color:var(--text2); margin-top:4px; }
+.sc2 .sc-code{color:var(--green)} .sc3 .sc-code{color:var(--blue)}
+.sc4 .sc-code{color:var(--amber)} .sc5 .sc-code{color:var(--red)}
+
+/* ── INTERVIEW CARDS ── */
+.interview-q {
+  border:1px solid var(--border);
+  border-radius:10px; margin-bottom:12px;
+  overflow:hidden; background:var(--s1);
+}
+.iq-question {
+  padding:16px 20px; cursor:pointer;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:12px; transition:background .15s;
+}
+.iq-question:hover { background:var(--s2); }
+.iq-q-text {
+  font-size:14px; font-weight:600; color:var(--text); line-height:1.5;
+  flex:1;
+}
+.iq-meta { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.iq-diff { font-family:var(--font-mono); font-size:9px; padding:2px 7px; border-radius:2px; }
+.diff-mid { background:rgba(0,229,255,.1); color:var(--cyan); }
+.diff-hard { background:rgba(255,183,0,.1); color:var(--amber); }
+.diff-expert { background:rgba(255,77,109,.1); color:var(--red); }
+.iq-toggle { color:var(--text3); font-size:11px; transition:transform .25s; flex-shrink:0; margin-top:2px; }
+.interview-q.open .iq-toggle { transform:rotate(180deg); }
+.iq-answer {
+  display:none; padding:0 20px 20px;
+  border-top:1px solid var(--border);
+}
+.interview-q.open .iq-answer { display:block; animation:fadeUp .2s ease; }
+.answer-label {
+  font-family:var(--font-mono); font-size:10px; color:var(--green);
+  text-transform:uppercase; letter-spacing:1px;
+  margin:14px 0 8px;
+}
+.answer-text { font-size:14px; color:var(--text2); line-height:1.75; }
+
+.tip-box {
+  border-radius:8px; padding:12px 16px;
+  font-size:13px; color:var(--text2); line-height:1.6;
+  margin:10px 0;
+}
+.tip-cyan { background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.15); }
+.tip-amber { background:rgba(255,183,0,.05); border:1px solid rgba(255,183,0,.15); }
+.tip-green { background:rgba(0,255,157,.05); border:1px solid rgba(0,255,157,.15); }
+.tip-red { background:rgba(255,77,109,.05); border:1px solid rgba(255,77,109,.15); }
+
+.tip-label {
+  font-family:var(--font-mono); font-size:10px;
+  text-transform:uppercase; letter-spacing:1px;
+  display:block; margin-bottom:5px;
+}
+.tip-cyan .tip-label { color:var(--cyan); }
+.tip-amber .tip-label { color:var(--amber); }
+.tip-green .tip-label { color:var(--green); }
+.tip-red .tip-label { color:var(--red); }
+
+/* ── METRICS ── */
+.metrics-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:12px; margin:12px 0;
+}
+.metric-card {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:10px; padding:18px;
+  transition:all .2s;
+}
+.metric-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+.metric-name { font-family:var(--font-mono); font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.metric-formula {
+  font-family:var(--font-mono); font-size:13px;
+  color:var(--cyan); margin-bottom:6px;
+  line-height:1.4;
+}
+.metric-desc { font-size:12px; color:var(--text3); line-height:1.5; }
+
+/* ── FLASHCARD ── */
+.fc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin:10px 0; }
+.fc { perspective:1000px; height:130px; cursor:pointer; }
+.fc-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; }
+.fc.flipped .fc-inner { transform:rotateY(180deg); }
+.fc-front,.fc-back {
+  position:absolute; inset:0; backface-visibility:hidden;
+  border-radius:8px; border:1px solid var(--border);
+  padding:14px 16px; display:flex; flex-direction:column; justify-content:center;
+}
+.fc-front { background:var(--s2); }
+.fc-back { background:linear-gradient(135deg,rgba(0,229,255,.06),var(--s2)); border-color:rgba(0,229,255,.2); transform:rotateY(180deg); }
+.fc-term { font-family:var(--font-mono); font-size:13px; color:var(--cyan); font-weight:700; margin-bottom:4px; }
+.fc-hint { font-size:10px; color:var(--text3); }
+.fc-def { font-size:12px; color:var(--text2); line-height:1.55; }
+
+/* ── QUIZ ── */
+.quiz-wrap {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:12px; padding:28px; margin-top:24px;
+}
+.quiz-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.quiz-ttl {
+  font-family:var(--font-display); font-size:22px; letter-spacing:2px;
+  color:var(--text); display:flex; align-items:center; gap:8px;
+}
+.quiz-ctr { font-family:var(--font-mono); font-size:12px; color:var(--text3); }
+
+.quiz-dots { display:flex; gap:4px; margin-bottom:20px; }
+.qdot { height:3px; flex:1; border-radius:1px; background:var(--s4); transition:background .3s; }
+.qdot.done { background:var(--green); }
+.qdot.cur { background:var(--cyan); }
+
+.q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.6; margin-bottom:18px; }
+
+.q-opts { display:flex; flex-direction:column; gap:9px; }
+
+.qopt {
+  padding:13px 17px; border-radius:8px;
+  border:1px solid var(--border); cursor:pointer;
+  font-size:14px; color:var(--text2);
+  transition:all .15s; display:flex; align-items:center; gap:12px;
+  background:var(--s2);
+}
+.qopt:hover:not(.dis) { border-color:rgba(0,229,255,.4); color:var(--text); }
+.qopt.sel { border-color:var(--cyan); background:rgba(0,229,255,.06); color:var(--text); }
+.qopt.cor { border-color:var(--green); background:rgba(0,255,157,.06); color:var(--green); }
+.qopt.wrg { border-color:var(--red); background:rgba(255,77,109,.06); color:var(--red); }
+.qopt.dis { cursor:default; }
+
+.opt-lt {
+  width:24px; height:24px; border-radius:4px;
+  background:var(--s3); color:var(--text3);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:11px; font-weight:700;
+  flex-shrink:0; transition:all .2s;
+}
+.qopt.sel .opt-lt { background:var(--cyan); color:var(--bg); }
+.qopt.cor .opt-lt { background:var(--green); color:var(--bg); }
+.qopt.wrg .opt-lt { background:var(--red); color:#fff; }
+
+.q-fb { margin-top:14px; padding:12px 16px; border-radius:8px; display:none; font-size:13px; line-height:1.6; }
+.q-fb.show { display:block; animation:fadeUp .2s ease; }
+.q-fb.fb-ok { background:rgba(0,255,157,.07); border:1px solid rgba(0,255,157,.2); color:var(--green); }
+.q-fb.fb-no { background:rgba(255,77,109,.07); border:1px solid rgba(255,77,109,.2); color:var(--red); }
+
+.q-actions { margin-top:16px; display:flex; justify-content:flex-end; gap:10px; }
+
+.btn {
+  padding:8px 18px; border-radius:6px;
+  font-size:13px; cursor:pointer; border:none;
+  font-family:var(--font-body); font-weight:600;
+  transition:all .15s;
+}
+.btn-ghost { background:var(--s3); color:var(--text2); border:1px solid var(--border); }
+.btn-ghost:hover { border-color:var(--cyan); color:var(--cyan); }
+.btn-cyan { background:var(--cyan); color:var(--bg); }
+.btn-cyan:hover { box-shadow:0 0 18px rgba(0,229,255,.35); transform:translateY(-1px); }
+.btn-green { background:var(--green); color:var(--bg); }
+.btn-green:hover { box-shadow:0 0 18px rgba(0,255,157,.35); transform:translateY(-1px); }
+
+.result-wrap { text-align:center; padding:24px; }
+.result-score { font-family:var(--font-display); font-size:72px; letter-spacing:4px; margin:10px 0; }
+.result-bar { height:6px; background:var(--s4); border-radius:99px; overflow:hidden; margin:12px 0; }
+.result-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--cyan),var(--green)); transition:width 1s ease; }
+.result-msg { font-size:16px; color:var(--text2); }
+
+/* ── SCENARIO ── */
+.scenario-box {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:10px; padding:20px;
+  margin:12px 0;
+}
+.scenario-label {
+  font-family:var(--font-mono); font-size:10px;
+  color:var(--amber); text-transform:uppercase; letter-spacing:1.5px;
+  margin-bottom:10px; display:block;
+}
+.scenario-text { font-size:14px; color:var(--text); line-height:1.7; font-weight:500; }
+.scenario-response { margin-top:14px; border-top:1px solid var(--border); padding-top:14px; }
+.sr-label { font-family:var(--font-mono); font-size:10px; color:var(--green); margin-bottom:8px; display:block; text-transform:uppercase; letter-spacing:1px; }
+
+/* ── KEYWORD CHIPS ── */
+.kw-grid { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.kw-chip {
+  padding:6px 14px; border-radius:5px;
+  font-family:var(--font-mono); font-size:12px;
+  border:1px solid var(--border); background:var(--s2);
+  color:var(--text2); cursor:pointer; transition:all .2s;
+  position:relative;
+}
+.kw-chip:hover { border-color:var(--cyan); color:var(--cyan); }
+.kw-chip.expanded { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,.07); }
+.kw-chip-def {
+  display:none; position:absolute; bottom:calc(100% + 8px); left:50%;
+  transform:translateX(-50%);
+  background:var(--s3); border:1px solid var(--border2);
+  border-radius:8px; padding:12px 14px; width:260px;
+  font-size:12px; color:var(--text2); line-height:1.6;
+  z-index:50; box-shadow:0 8px 24px rgba(0,0,0,.5);
+  font-family:var(--font-body);
+}
+.kw-chip:hover .kw-chip-def { display:block; }
+
+/* ── MOBILE ── */
+#mob-btn {
+  display:none; position:fixed; top:12px; left:12px; z-index:200;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:6px; padding:7px 11px; cursor:pointer;
+  font-size:16px; color:var(--text);
+}
+#overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.6); z-index:90;
+  backdrop-filter:blur(4px);
+}
+
+@media(max-width:800px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  #content{padding:24px 18px}
+  #mob-btn{display:block}
+  #overlay.show{display:block}
+  .mod-title{font-size:36px}
+  #topbar{padding:12px 18px 12px 52px}
+}
+
+/* ── EXAM SPECIFIC ── */
+.exam-intro-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:12px; margin:16px 0;
+}
+.exam-stat {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:10px; padding:18px; text-align:center;
+}
+.es-num { font-family:var(--font-display); font-size:36px; letter-spacing:2px; color:var(--cyan); }
+.es-lbl { font-size:12px; color:var(--text3); margin-top:4px; font-family:var(--font-mono); }
+
+/* behavioral */
+.star-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:12px 0;
+}
+.star-card {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:8px; padding:14px; text-align:center;
+}
+.star-letter { font-family:var(--font-display); font-size:28px; letter-spacing:2px; }
+.star-word { font-size:11px; color:var(--text3); margin-top:2px; }
+</style>
+</head>
+<body>
+
+<button id="mob-btn" onclick="toggleSb()">☰</button>
+<div id="overlay" onclick="toggleSb()"></div>
+
+<div id="shell">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="logo-mark">
+      <div class="logo-hex">🧪</div>
+      <div>
+        <div class="logo-text">QA PRO</div>
+        <div class="logo-sub">Senior · ISTQB · Interview</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-progress">
+    <div class="sp-row"><span>Progreso total</span><span class="sp-pct" id="gPct">0%</span></div>
+    <div class="pbar"><div class="pbar-fill" id="gBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="sb-nav" id="sbNav"></div>
+
+  <div class="sb-footer">v2.0 · Senior Level · 2025</div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-crumb" id="tbCrumb">QA PRO / <span>Inicio</span></div>
+    <div class="tb-right">
+      <div class="chip" onclick="showMod('keywords')">🔑 Keywords</div>
+      <div class="chip" onclick="showMod('exam')" id="examChip">🎓 Examen Final</div>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+
+const MODS = [
+  {id:'home',      label:'Inicio',               icon:'🏠', tag:'Inicio'},
+  {id:'istqb',     label:'ISTQB Avanzado',        icon:'📋', tag:'M-01'},
+  {id:'functional',label:'Testing Funcional',     icon:'⚙️', tag:'M-02'},
+  {id:'api',       label:'API Testing Profundo',  icon:'🔌', tag:'M-03'},
+  {id:'metrics',   label:'Métricas & Reporting',  icon:'📊', tag:'M-04'},
+  {id:'scenarios', label:'Casos de Escenario',    icon:'🎯', tag:'M-05'},
+  {id:'behavioral',label:'Entrevista Behavioral', icon:'🧠', tag:'M-06'},
+  {id:'keywords',  label:'Keywords & Glosario',   icon:'🔑', tag:'M-07'},
+  {id:'interview', label:'Preguntas de Entrevista',icon:'💼', tag:'M-08'},
+  {id:'exam',      label:'Examen Final',           icon:'🎓', tag:'FINAL', isExam:true},
+];
+
+const QUIZZES = {
+  istqb:[
+    {q:'¿Qué principio ISTQB establece que los defectos tienden a concentrarse en un número pequeño de módulos del sistema?',opts:['Pesticide Paradox','Defect Clustering','Absence-of-Errors Fallacy','Early Testing'],c:1,fb:'Defect Clustering (Principio 4): estadísticamente el 80% de los defectos se hallan en el 20% de los módulos. Esto guía el Risk-Based Testing.'},
+    {q:'En el modelo V, ¿qué nivel de prueba corresponde al diseño de alto nivel (arquitectura)?',opts:['Unit Testing','Integration Testing','System Testing','Acceptance Testing'],c:1,fb:'Integration Testing valida la arquitectura e interfaces entre módulos, que se definen en el diseño de alto nivel.'},
+    {q:'¿Cuál es la diferencia técnica entre Verification y Validation según IEEE?',opts:['Son sinónimos en estándar IEEE','Verification: ¿construimos bien el producto? Validation: ¿construimos el producto correcto?','Validation ocurre antes que Verification','Verification solo aplica a código fuente'],c:1,fb:'IEEE 610.12: Verification = proceso de evaluar que el software cumple las condiciones impuestas (specs). Validation = proceso de evaluar que cumple las necesidades del usuario final.'},
+    {q:'¿Qué es el "Absence of Errors Fallacy" en ISTQB?',opts:['Error que desaparece al debuggear','Suponer que sin bugs el software es útil y correcto','Técnica de detección de falsos positivos','Principio que dice que los errores siempre existen'],c:1,fb:'Principio 7: encontrar y corregir todos los bugs no garantiza que el software satisfaga las necesidades del negocio. Un sistema puede pasar todos los tests y ser inútil para el cliente.'},
+    {q:'¿Qué es el "Exhaustive Testing" según ISTQB y por qué es imposible?',opts:['Probar con datos reales de producción','Probar todas las combinaciones posibles de entradas y condiciones — imposible por la cantidad infinita de combinaciones','Testing de 48 horas continuas','Probar el 100% de las líneas de código'],c:1,fb:'Para un campo de texto de solo 10 caracteres ASCII, hay 128^10 combinaciones posibles (≈ 10^21). Es matemáticamente imposible. Por eso usamos técnicas como EP, BVA y Risk-Based Testing.'},
+  ],
+  functional:[
+    {q:'Un campo de precio acepta valores de 0.01 a 9999.99. Aplicando BVA de 3 puntos, ¿cuáles son los valores límite inferiores?',opts:['0, 0.01, 0.02','0.00, 0.01, 0.02','0.01, 1.00, 9999.99','0, 1, 9999'],c:1,fb:'BVA de 3 puntos en límite inferior: justo debajo (0.00 = inválido), en el límite (0.01 = válido), justo arriba (0.02 = válido). El límite superior sería: 9999.98, 9999.99, 10000.00.'},
+    {q:'¿Cuándo se usa State Transition Testing?',opts:['Para cualquier formulario con campos de texto','Para sistemas donde el comportamiento depende del estado actual y del historial de eventos','Solo para pruebas de UI','Para APIs REST'],c:1,fb:'State Transition Testing modela sistemas que tienen estados distintos y transiciones basadas en eventos. Ejemplo: semáforo, proceso de pago (pendiente→procesando→aprobado→rechazado).'},
+    {q:'¿Qué es la cobertura de decisión (Decision Coverage) en pruebas de caja blanca?',opts:['Ejecutar cada línea de código al menos una vez','Asegurar que cada resultado posible de cada punto de decisión se ejercita (true y false)','Probar todas las ramas del código excepto las de error','Coverage del 100% de funciones'],c:1,fb:'Decision Coverage (Branch Coverage): cada punto de decisión (if/switch) debe evaluarse a true Y a false en algún test. Es más fuerte que Statement Coverage y más débil que Condition Coverage.'},
+    {q:'¿Qué diferencia hay entre un Test Plan y una Test Strategy?',opts:['Son el mismo documento con distinto nombre','Strategy: documento de alto nivel que define el enfoque general de QA en la organización. Plan: documento específico de proyecto con alcance, recursos y cronograma','Plan es más general que Strategy','Strategy la escribe el Dev, Plan el QA'],c:1,fb:'Test Strategy: nivel organizacional, define el approach general, tipos de prueba, herramientas estándar. Test Plan (IEEE 829): nivel proyecto, define qué se prueba, cómo, quién, cuándo y con qué recursos específicos.'},
+    {q:'¿Qué es el concepto de "Test Oracle"?',opts:['Herramienta de base de datos para QA','Mecanismo para determinar si el resultado actual de una prueba es el esperado (correcto o incorrecto)','Sistema de IA que genera casos de prueba','Nombre del framework de pruebas de Oracle Corp'],c:1,fb:'Test Oracle: la fuente de la "verdad esperada". Puede ser: especificación formal, comportamiento del sistema anterior (regression oracle), intuición del experto, o resultado matemático. Sin oracle, no puedes decidir si una prueba pasó o falló.'},
+  ],
+  api:[
+    {q:'¿Qué significa que un método HTTP sea "idempotente" y cuál NO lo es?',opts:['Todos los métodos son idempotentes','Idempotente = mismo resultado sin importar cuántas veces se llame. POST NO es idempotente','Solo GET es idempotente','Idempotente significa que requiere autenticación'],c:1,fb:'Idempotentes: GET, PUT, DELETE, HEAD, OPTIONS. NO idempotente: POST (cada llamada crea un nuevo recurso). PATCH técnicamente tampoco si el body no es determinista. Crucial para retry-logic en sistemas distribuidos.'},
+    {q:'¿Cuál es la diferencia entre autenticación 401 y autorización 403?',opts:['Son el mismo error con diferente código','401: No autenticado (sin credenciales o inválidas). 403: Autenticado pero sin permisos para el recurso','401 es del servidor, 403 del cliente','403 ocurre cuando el token expira'],c:1,fb:'401 Unauthorized: el cliente no se ha identificado o sus credenciales son inválidas. El header WWW-Authenticate debe estar presente. 403 Forbidden: el cliente está identificado pero el servidor rechaza la acción. No hay nada que el cliente pueda hacer para obtener acceso.'},
+    {q:'¿Qué es un contrato de API y para qué sirve en testing?',opts:['El SLA de disponibilidad de la API','Especificación formal (OpenAPI/Swagger) que define endpoints, request/response schemas y comportamientos esperados. Permite Contract Testing','El acuerdo legal con el proveedor de la API','La documentación en PDF de la API'],c:1,fb:'Contract Testing (Pact, Spring Cloud Contract): el consumidor define sus expectativas (contrato) y el proveedor verifica que los cumple, independientemente. Detecta breaking changes sin integration tests end-to-end costosos.'},
+    {q:'¿Cómo testeas la seguridad básica de un endpoint de API?',opts:['Solo verificas que el status code sea 200','Pruebas: endpoints sin auth (401), con token de otro usuario (403), SQL injection en params, datos masivos en body, manipulación de IDs en path params (IDOR)','Solo pruebas con credenciales válidas','La seguridad no es responsabilidad del QA'],c:1,fb:'Security Testing básico en APIs: IDOR (Insecure Direct Object Reference), mass assignment, broken auth, injection en query params, rate limiting, exposición de datos sensibles en respuestas. OWASP API Top 10 es la referencia clave.'},
+    {q:'¿Qué es un mock vs un stub vs un spy en testing?',opts:['Son sinónimos de test double','Mock: objeto con expectativas predefinidas que verifica interacciones. Stub: devuelve respuestas predefinidas sin verificar. Spy: wrapper que registra llamadas al objeto real','Stub es más complejo que Mock','Spy solo existe en JavaScript'],c:1,fb:'Test Doubles (Fowler): Dummy (relleno), Fake (impl. simplificada), Stub (respuestas programadas), Spy (wrapper que registra), Mock (expectativas + verificación). En API testing: mocks simulan servicios externos en pruebas de integración.'},
+  ],
+  metrics:[
+    {q:'¿Cómo calculas la densidad de defectos de un módulo?',opts:['Total de bugs / Total de días','Defectos encontrados / Tamaño del módulo (KLOC o puntos de función)','Bugs críticos / Bugs totales','Defectos / Número de testers'],c:1,fb:'Defect Density = Defectos / Tamaño (KLOC). Permite comparar calidad entre módulos de diferente tamaño. Módulo A: 10 bugs / 2 KLOC = 5 bugs/KLOC. Módulo B: 15 bugs / 5 KLOC = 3 bugs/KLOC → B tiene mejor calidad relativa.'},
+    {q:'¿Qué mide el "Defect Removal Efficiency" (DRE)?',opts:['Velocidad de resolución de bugs','Porcentaje de defectos encontrados ANTES de producción vs total (incluyendo producción). DRE = Pre-prod bugs / (Pre-prod + Post-prod bugs) × 100','Número de bugs por sprint','Eficiencia del equipo de desarrollo'],c:1,fb:'DRE ideal: >95%. Si encuentras 95 de 100 bugs antes de producción, DRE = 95%. Es la métrica más importante de efectividad del proceso de QA. Un DRE bajo indica que el proceso de testing falla en detectar defectos a tiempo.'},
+    {q:'¿Cuál es la diferencia entre test coverage de código y test coverage de requisitos?',opts:['Son lo mismo medido diferente','Code coverage: % de código ejecutado por tests (líneas/branches). Requirements coverage: % de requisitos cubiertos por al menos un test case. Miden cosas distintas','Requirements coverage siempre será mayor','Code coverage del 100% garantiza calidad'],c:1,fb:'Code coverage del 100% no implica que todos los requisitos están probados. Requirements traceability matrix (RTM) mapea tests a requisitos. Un sistema puede tener 80% code coverage pero solo cubrir el 60% de los requisitos funcionales.'},
+    {q:'¿Qué es el "Test Execution Rate" y cómo impacta la planificación?',opts:['Porcentaje de tests automatizados','TER = Casos ejecutados / Casos planificados × 100 en un período. Mide la velocidad real de ejecución vs plan. Un TER bajo en sprints tempranos indica riesgo de no completar testing a tiempo','Velocidad en segundos de cada test','Número de tests por día'],c:1,fb:'TER bajo → identificar bloqueadores: ambientes inestables, datos de prueba faltantes, recursos insuficientes, dependencias de desarrollo. En Agile, si en sprint 1 el TER es 60%, debes re-estimar la capacidad o reducir alcance.'},
+    {q:'¿Cómo presentas las métricas de QA a stakeholders no técnicos?',opts:['Les das el reporte técnico completo','Traduces a impacto de negocio: % de releases sin bugs críticos, tiempo ahorrado por automatización, costo de bugs en producción vs pre-producción, tendencia de calidad entre versiones','Solo muestras el número de bugs encontrados','No compartes métricas con stakeholders'],c:1,fb:'Principio: translate to business impact. En vez de "tenemos 85% de code coverage", di "detectamos 3 de cada 4 defectos antes del lanzamiento, reduciendo incidentes en producción en un 60% vs Q1".'},
+  ],
+  scenarios:[
+    {q:'Un bug crítico aparece en producción una hora antes del Black Friday. No hay fix disponible. ¿Cómo manejas la situación?',opts:['Envías email al equipo y esperas','Activar protocolo: 1) Evaluar impacto real 2) Buscar workaround inmediato 3) Decidir rollback vs feature flag 4) Comunicar a stakeholders con timeline 5) Post-mortem después','Haces rollback inmediato sin consultar','Cierras el sistema hasta tener el fix'],c:1,fb:'Respuesta de senior: primero medir impacto real (¿cuántos usuarios afectados? ¿es el flujo de pago o algo periférico?). Si hay workaround viable, comunicar y mantener. Si es crítico para revenue, rollback. Siempre comunicar proactivamente con timeline y never-blame en crisis.'},
+    {q:'Te piden aumentar la cobertura de automatización del 30% al 80% en 3 meses con el mismo equipo. ¿Cuál es tu estrategia?',opts:['Aceptas el objetivo sin cuestionarlo','Priorizas por ROI: automatizar primero regression crítica, smoke tests, y los flujos de mayor frecuencia. Defines criterios de "automatable". Negocias alcance realista. Creas framework reutilizable antes de escribir tests','Automatizas todo en paralelo','Rechazas el objetivo por imposible'],c:1,fb:'Estrategia senior: primero auditar qué existe, identificar candidatos para automatización (estables, frecuentes, críticos). El 80% de tests automatizados NO siempre es el objetivo correcto: mejor 60% de cobertura en los flujos de mayor riesgo que 80% en funcionalidades triviales.'},
+    {q:'El equipo de desarrollo dice "no hay tiempo para testing" antes de un release crítico. ¿Cómo respondes?',opts:['Aceptas y firmas el release sin testing','Presentas el riesgo cuantificado: probabilidad × impacto de los escenarios sin probar. Propones smoke test mínimo en 2 horas + monitoring en producción. La decisión de riesgo es del negocio, no del QA','Te niegas rotundamente a liberar','Haces testing rápido sin documentar'],c:1,fb:'El QA no bloquea releases: informa el riesgo con datos y el negocio decide. "Si no probamos módulo de pago, el riesgo es X transacciones fallidas basado en el bug anterior. ¿Aceptamos ese riesgo o hacemos un smoke de 90 minutos?" La decisión final es del Product Owner.'},
+    {q:'Encuentras que el 70% de los bugs en producción vienen del mismo módulo. ¿Qué propones?',opts:['Contratar más QA para ese módulo','Análisis RCA del módulo: revisión de código, deuda técnica, coverage actual, complejidad ciclomática. Proponer refactoring, pair testing con dev, aumentar cobertura de automation en ese módulo específico y establecer quality gates','Ignorarlo y enfocarte en otros módulos','Reportar el módulo como "legacy" y sin soporte'],c:1,fb:'Defect Clustering en acción. Propuesta senior: presenta el análisis de datos (defect density del módulo), recomendas RCA colaborativo con el equipo de dev, propones aumentar testing en ese módulo y evaluar si la deuda técnica requiere refactoring antes de seguir acumulando tests sobre código inestable.'},
+  ],
+  behavioral:[
+    {q:'Pregunta: "Cuéntame sobre un bug crítico que encontraste en producción y cómo lo manejaste."',opts:['Cuentas cualquier bug que recuerdes','Usas el método STAR: Situación (contexto del proyecto), Tarea (tu rol), Acción (qué hiciste: detección, comunicación, workaround, fix, validación), Resultado (impacto en negocio, qué se aprendió, proceso mejorado)','Dices que nunca has tenido bugs en producción','Culpas al equipo de desarrollo'],c:1,fb:'STAR es obligatorio en behavioral. Los seniors agregan el "After": qué proceso cambiaron después para prevenir recurrencia. Muestra ownership, comunicación efectiva y pensamiento sistémico.'},
+    {q:'Pregunta: "¿Cómo priorizas cuándo tienes más bugs que tiempo para probarlos todos?"',opts:['Los pruebas todos en el orden que llegan','Prioridad basada en: 1) Riesgo de negocio 2) Probabilidad de ocurrencia 3) Impacto en usuario 4) Flujos críticos. Siempre probar el camino feliz de las funcionalidades core + regresión de lo modificado','Los pruebas alfabéticamente','Le preguntas al jefe qué probar'],c:1,fb:'Senior answer: articula un framework de priorización. Menciona Risk-Based Testing, la regla del 80/20, y que la decisión final sobre qué NO probar debe ser explícita y documentada, no implícita.'},
+    {q:'Pregunta: "¿Cómo manejas el conflicto cuando un desarrollador dice que tu bug no es un bug?"',opts:['Escala inmediatamente al manager','Presentas evidencia objetiva: pasos reproducibles documentados, comparas contra la especificación/criterio de aceptación. Si no hay spec, es una conversación sobre expectativas. Involucras al PO para claridad. El objetivo es la calidad, no tener razón','Cierras el bug sin más','Creas más bugs para compensar'],c:1,fb:'Los conflictos QA-Dev son sobre evidence, no ego. Un buen QA dice: "Según la user story X, el comportamiento esperado es Y. Estoy viendo Z. ¿Estamos de acuerdo en eso?" Si no hay criterio de aceptación claro, el bug revela un gap de definición, no necesariamente un error del dev.'},
+    {q:'Pregunta: "¿Qué harías si tu manager te pide firmar un release que consideras de alto riesgo?"',opts:['Lo firmas para no tener problemas','Documentas formalmente el riesgo (escrito, email), propones mitigaciones (monitoring adicional, rollback plan, comunicación a usuarios), y si el manager elige proceder, la decisión y responsabilidad del riesgo queda documentada. Tu firma certifica que testing se completó según el plan acordado, no que el software es perfecto','Te niegas y renuncias','Filtras la información externamente'],c:1,fb:'Profesionalismo: el QA informa, documenta y asesora. La decisión de negocio es del negocio. El trail de comunicación escrito protege al QA y fuerza una decisión explícita del management sobre el riesgo. "Risk accepted by [manager name] on [date]" en el ticket de release.'},
+  ],
+  keywords:[],
+  interview:[],
+};
+
+const EXAM_QS = [
+  {q:'¿Qué principio ISTQB aplica cuando el mismo conjunto de tests deja de encontrar nuevos defectos?',opts:['Early Testing','Defect Clustering','Pesticide Paradox','Testing is context-dependent'],c:2,fb:'Pesticide Paradox: renovar y actualizar los tests periódicamente para mantener su efectividad.'},
+  {q:'¿Qué técnica de diseño de tests se usa cuando el comportamiento del sistema depende de la secuencia de eventos pasados?',opts:['Equivalence Partitioning','State Transition Testing','Boundary Value Analysis','Decision Table'],c:1,fb:'State Transition: ideal para modelar máquinas de estado donde el output depende del estado actual y el evento recibido.'},
+  {q:'¿Cuál de los siguientes verbos HTTP es idempotente pero NO safe?',opts:['GET','HEAD','DELETE','OPTIONS'],c:2,fb:'DELETE es idempotente (llamarlo N veces tiene el mismo efecto que una vez) pero no es safe porque modifica el servidor.'},
+  {q:'¿Qué mide el DRE (Defect Removal Efficiency)?',opts:['Velocidad de resolución de bugs','% de defectos eliminados antes de llegar a producción','Número de defectos por sprint','Eficiencia del equipo de automatización'],c:1,fb:'DRE = Pre-prod defects / (Pre-prod + Post-prod defects) × 100. Un DRE >95% indica proceso de QA muy efectivo.'},
+  {q:'Un endpoint devuelve 200 OK pero el body tiene datos incorrectos. ¿Qué tipo de prueba detecta esto?',opts:['Solo pruebas de status code','Validación del response body/schema en pruebas funcionales de API','Pruebas de performance','Pruebas de seguridad'],c:1,fb:'Las pruebas funcionales de API deben validar: status code, schema del JSON, valores específicos de los campos, headers y tiempo de respuesta.'},
+  {q:'¿Cuál es la diferencia entre Severity y Priority en la gestión de defectos?',opts:['Son sinónimos','Severity = impacto técnico del bug. Priority = urgencia de resolución según el negocio. Pueden ser independientes','Priority la define el QA, Severity el Dev','Severity solo aplica a bugs críticos'],c:1,fb:'Ejemplo: error tipográfico en el nombre de la empresa en homepage = Low Severity, High Priority (impacto de imagen). Crash en feature que nadie usa = High Severity, Low Priority.'},
+  {q:'¿Qué es el "Shift Left Testing"?',opts:['Testing solo en fases finales','Mover actividades de testing hacia fases más tempranas del SDLC para detectar defectos antes y reducir costos','Solo aplica a metodologías ágiles','Automatizar todo el testing'],c:1,fb:'Shift Left reduce el costo de corrección exponencialmente. Incluye: revisión de requerimientos, TDD, pair testing, pruebas de API antes que UI, y QA participando en el refinamiento de historias.'},
+  {q:'¿Qué es un "test double" y cuáles son sus tipos según Fowler?',opts:['Un test que se ejecuta dos veces','Objeto que reemplaza una dependencia real en tests: Dummy, Fake, Stub, Spy, Mock','Sinónimo de test de regresión','Par de tests que validan la misma funcionalidad'],c:1,fb:'Fowler: Dummy (relleno para compilar), Fake (implementación simplificada funcional), Stub (respuestas predefinidas), Spy (graba llamadas al objeto real), Mock (expectativas + auto-verificación).'},
+  {q:'¿Qué es la cobertura de decisión (Decision/Branch Coverage)?',opts:['100% de líneas de código ejecutadas','Cada resultado posible de cada punto de decisión (if/switch) se ejerce al menos una vez tanto a verdadero como a falso','Solo cubrir el flujo principal','Cubrir todos los loops del código'],c:1,fb:'Branch Coverage > Statement Coverage. Para un if/else, necesitas al menos 2 tests: uno donde la condición sea true y otro donde sea false. Es el mínimo recomendado para testing de caja blanca.'},
+  {q:'¿Cuál es la estrategia correcta ante un bug crítico en producción que afecta al 5% de usuarios?',opts:['Rollback inmediato siempre','Evaluar impacto real, buscar workaround, comunicar a stakeholders con ETA, documentar en post-mortem. Rollback si impacto es inaceptable, feature flag si es posible aislar','Esperar a la siguiente versión','Ignorarlo si solo afecta al 5%'],c:1,fb:'El 5% puede ser tu segmento premium o el flujo de pago crítico. Siempre mide el impacto en términos de negocio, no solo porcentaje de usuarios. La comunicación proactiva y el RCA post-mortem son no negociables.'},
+  {q:'¿Qué es el "Testing Pyramid" y cómo guía la estrategia de automatización?',opts:['Modelo decorativo sin aplicación práctica','Modelo de Mike Cohn: mayor cantidad de unit tests (rápidos, baratos), menos integration tests, muy pocos E2E tests (lentos, frágiles). Guía la inversión en automatización','Significa que los E2E tests son los más importantes','Solo aplica a microservicios'],c:1,fb:'Testing Pyramid: unit (70%) → integration (20%) → E2E (10%). La "Ice Cream Cone" antipattern (mayoría E2E) es el error más común en automatización: suites lentas, frágiles y difíciles de mantener.'},
+  {q:'¿Qué es Contract Testing y cuándo se usa?',opts:['El contrato legal con el proveedor de QA','Verificar que el consumidor y proveedor de una API acuerdan sobre el formato y comportamiento del contrato (Pact, Spring Cloud Contract). Clave en arquitecturas de microservicios','Solo aplica cuando hay acuerdo de SLA','Es otro nombre para integration testing'],c:1,fb:'Contract Testing detecta breaking changes en APIs sin necesitar un entorno de integración completo. El consumidor define sus expectativas, el proveedor las verifica. Pact es el estándar open-source más usado.'},
+  {q:'¿Cómo defiendes la calidad cuando hay presión de tiempo y el equipo quiere saltarse las pruebas de regresión?',opts:['Aceptas sin cuestionamiento','Presentas datos: historial de bugs de regresión, costo de bugs en producción vs testing, propones regression smoke (subconjunto crítico en 2h) y documentas los riesgos asumidos','Te niegas y bloqueas el release','Haces testing secretamente sin decirlo'],c:1,fb:'El QA presenta opciones con trade-offs cuantificados, no bloquea unilateralmente. "Podemos hacer regression completa en 8h o regression crítica en 2h con estos 5 escenarios no cubiertos y este riesgo asociado. ¿Cuál eligió el equipo?" La decisión se documenta.'},
+  {q:'¿Qué es IDOR y cómo lo pruebas en una API?',opts:['Una herramienta de testing de APIs','Insecure Direct Object Reference: cuando puedes acceder a recursos de otros usuarios cambiando un ID en la URL. Se prueba creando 2 usuarios, obteniendo IDs de recursos del usuario A e intentando accederlos con token del usuario B','Un error de autenticación 401','Un tipo de SQL injection'],c:1,fb:'IDOR es el #1 en vulnerabilidades de APIs (OWASP API Top 10). GET /api/orders/12345 con token del usuario que creó order #12346 no debería funcionar. Si devuelve 200 con datos de otro usuario → vulnerabilidad crítica.'},
+  {q:'¿Cuál es la fórmula y uso del "Mean Time To Detect" (MTTD) en métricas de QA?',opts:['Tiempo promedio de ejecución de tests','MTTD = Tiempo total hasta detectar un defecto / Número de defectos. Mide la agilidad del proceso de detección. Un MTTD alto indica que los defectos tardan en ser visibles al equipo de QA','Tiempo para resolver un bug','Tiempo de ejecución del suite de tests'],c:1,fb:'MTTD junto con MTTR (Mean Time To Repair) son métricas operacionales clave. MTTD alto puede indicar: ambientes de testing inestables, falta de monitoring, ciclos de feedback largos entre desarrollo y testing.'},
+  {q:'¿Qué es el "Shift Right Testing" y cómo complementa al Shift Left?',opts:['Mover testing a fases más tardías','Testing en producción o near-production: A/B testing, canary releases, chaos engineering, monitoring y observabilidad, feature flags. Complementa Shift Left con feedback real de usuarios','Es lo opuesto a Shift Left y siempre malo','Solo aplica a sistemas cloud'],c:1,fb:'Shift Right Testing incluye: monitoring con alertas inteligentes, logs y trazas distribuidas, chaos engineering (Netflix), canary deployments (liberar al 1% de usuarios), shadow testing. El loop completo: Shift Left (prevención) + Shift Right (detección en producción).'},
+  {q:'¿Cómo estructuras un reporte de QA ejecutivo para el sprint?',opts:['Lista todos los bugs encontrados','Dashboard con: cobertura de testing, pass/fail rate, defect density por componente, bugs abiertos por severidad, trend de calidad vs sprint anterior, y riesgos para el release. Traducido a impacto de negocio','Solo el número total de bugs','Email con el log de Jira'],c:1,fb:'Executive reporting: métrica → insight → acción. No solo "encontramos 12 bugs" sino "el módulo de checkout tiene defect density de 3x la media, recomendamos no liberar esta funcionalidad hasta el sprint 5 o aceptar el riesgo de X transacciones fallidas."'},
+  {q:'¿Qué técnica usas para probar una función de búsqueda con múltiples filtros combinables?',opts:['Pruebas el filtro más común solo','All-Pairs (Pairwise) Testing: reduce las combinaciones probando al menos una vez cada par de valores posibles. De millones de combinaciones a decenas. Herramientas: PICT, Hexawise','Pruebas todas las combinaciones posibles','Solo usas Equivalence Partitioning'],c:1,fb:'Pairwise Testing: si tienes 5 filtros con 3 valores cada uno, son 3^5 = 243 combinaciones. Pairwise reduce esto a ~18-25 tests cubriendo todos los pares. Asume que la mayoría de defectos son activados por la interacción de 2 parámetros.'},
+  {q:'¿Qué diferencia hay entre performance testing, load testing, stress testing y soak testing?',opts:['Son sinónimos del mismo tipo de prueba','Performance: baseline de rendimiento. Load: comportamiento bajo carga esperada. Stress: comportamiento más allá del límite (punto de quiebre). Soak/Endurance: comportamiento bajo carga sostenida durante horas/días (memory leaks)','Load y Stress son lo mismo','Solo JMeter puede hacer todos estos tipos'],c:1,fb:'Cada tipo responde una pregunta diferente: ¿Qué tan rápido es? (Performance) ¿Aguanta la carga esperada? (Load) ¿Dónde se rompe? (Stress) ¿Hay degradación en el tiempo? (Soak). Un sistema puede pasar Load pero fallar Soak por memory leaks.'},
+  {q:'¿Cómo defines una estrategia de testing para un sistema de microservicios?',opts:['Testing solo de la UI final','Múltiples niveles: Unit tests en cada servicio, Contract tests entre servicios (Pact), Integration tests de componentes críticos, E2E limitados a flujos de negocio core, API tests exhaustivos en cada servicio, y observabilidad/monitoring en producción','Solo E2E tests en el sistema completo','Un solo test que prueba todos los servicios juntos'],c:1,fb:'Microservices testing strategy: cada servicio se prueba en aislamiento + contract tests garantizan interfaces. Evitar "distributed monolith testing" donde todo depende de un E2E costoso. Testing Honeycomb de Spotify: más integration tests, menos E2E.'},
+];
+
+const KEYWORDS = [
+  {term:'Regression Testing', cat:'Tipos', def:'Pruebas para verificar que los cambios recientes no han roto funcionalidades que previamente funcionaban correctamente.'},
+  {term:'Smoke Testing', cat:'Tipos', def:'Pruebas rápidas de verificación básica de un build para determinar si vale la pena continuar con testing más profundo.'},
+  {term:'Sanity Testing', cat:'Tipos', def:'Verificación enfocada y específica de una corrección o feature reciente para confirmar que funciona según lo esperado.'},
+  {term:'Exploratory Testing', cat:'Técnica', def:'Testing simultáneo de diseño, ejecución y aprendizaje sin scripts previos. Basado en la experiencia y criterio del tester.'},
+  {term:'Equivalence Partitioning', cat:'Técnica', def:'Dividir datos de entrada en clases donde el sistema debería comportarse igual. Solo prueba un representante de cada clase.'},
+  {term:'Boundary Value Analysis', cat:'Técnica', def:'Probar en los límites de las particiones válidas e inválidas, donde los errores ocurren con mayor frecuencia.'},
+  {term:'Decision Table', cat:'Técnica', def:'Matriz que combina condiciones de entrada con las acciones/resultados correspondientes. Cubre todas las combinaciones lógicas.'},
+  {term:'State Transition', cat:'Técnica', def:'Modela el comportamiento de sistemas basados en estados, eventos y transiciones. Ideal para flujos de proceso.'},
+  {term:'Test Oracle', cat:'Concepto', def:'Mecanismo para determinar si el resultado de una prueba es correcto. Puede ser una spec, el sistema anterior, o conocimiento experto.'},
+  {term:'Defect Density', cat:'Métrica', def:'Número de defectos por unidad de tamaño del software (KLOC o puntos de función). Permite comparar calidad entre módulos.'},
+  {term:'DRE', cat:'Métrica', def:'Defect Removal Efficiency: % de defectos detectados antes de producción. DRE = Pre-prod/(Pre-prod+Post-prod) × 100. Meta: >95%.'},
+  {term:'MTTD', cat:'Métrica', def:'Mean Time To Detect: tiempo promedio desde que se introduce un defecto hasta que se detecta. Refleja agilidad del proceso QA.'},
+  {term:'MTTR', cat:'Métrica', def:'Mean Time To Repair: tiempo promedio desde detección de un defecto hasta su corrección y verificación en producción.'},
+  {term:'Test Coverage', cat:'Métrica', def:'Porcentaje de elementos del sistema cubiertos por tests: puede ser de código (lines, branches) o de requisitos.'},
+  {term:'IDOR', cat:'Seguridad', def:'Insecure Direct Object Reference: vulnerabilidad donde un usuario accede a recursos de otro usuario manipulando IDs en la URL.'},
+  {term:'Contract Testing', cat:'API', def:'Verificar que consumidor y proveedor de una API cumplen un contrato predefinido. Herramientas: Pact, Spring Cloud Contract.'},
+  {term:'Idempotente', cat:'API', def:'Propiedad donde realizar la misma operación N veces produce el mismo resultado que hacerlo una vez. GET, PUT, DELETE son idempotentes.'},
+  {term:'Shift Left', cat:'Estrategia', def:'Mover actividades de testing a fases más tempranas del SDLC para reducir el costo de detección y corrección de defectos.'},
+  {term:'Shift Right', cat:'Estrategia', def:'Testing en producción o near-production: canary releases, A/B testing, chaos engineering, monitoring y observabilidad.'},
+  {term:'Testing Pyramid', cat:'Estrategia', def:'Modelo de automatización: mayoría de tests unitarios (rápidos), menos de integración, mínimos E2E (lentos y frágiles).'},
+  {term:'Test Double', cat:'Concepto', def:'Objeto que reemplaza una dependencia real en tests. Tipos: Dummy, Fake, Stub, Spy, Mock (clasificación de Fowler).'},
+  {term:'Pairwise Testing', cat:'Técnica', def:'Reducir combinaciones probando cada par de parámetros al menos una vez. Reduce exponencialmente el número de tests necesarios.'},
+  {term:'Risk-Based Testing', cat:'Estrategia', def:'Priorizar el esfuerzo de testing según la probabilidad e impacto de los defectos potenciales en cada área del sistema.'},
+  {term:'Entry/Exit Criteria', cat:'Proceso', def:'Entry: condiciones que deben cumplirse para comenzar testing. Exit: condiciones que indican que testing puede finalizarse.'},
+];
+
+const INTERVIEW_QS = [
+  {q:'¿Cuál es tu enfoque cuando recibes una nueva historia de usuario para crear casos de prueba?', diff:'mid', a:'Empiezo analizando los criterios de aceptación con el PO para identificar ambigüedades. Luego identifico las particiones de equivalencia y valores límite. Creo casos para el happy path, unhappy path y edge cases. Verifico la trazabilidad a la historia. Reviso con el desarrollador antes de ejecutar para alinear expectativas. Para funcionalidades complejas, uso Decision Tables o State Transition según aplique.'},
+  {q:'¿Cómo decides qué automatizar y qué dejar como testing manual?', diff:'hard', a:'Candidatos para automatización: tests que se ejecutan frecuentemente (regression, smoke), flujos estables que no cambian mucho, cálculos repetitivos, pruebas de API, pruebas de rendimiento. Candidatos para manual: testing exploratorio, tests de usabilidad, casos que cambian frecuentemente con el producto, pruebas de un solo uso. El ROI es clave: si el costo de mantenimiento supera el tiempo ahorrado, no automatices.'},
+  {q:'¿Cómo manejas un ambiente de testing inestable que causa falsos negativos en tu suite de automatización?', diff:'hard', a:'Identifico si es flakiness determinista (data de prueba inconsistente, timing issues) o no determinista (dependencias externas). Soluciones: isolation de tests con datos propios, reintentos controlados (máximo 2 veces para no ocultar bugs reales), quarantine de tests flaky (reportar como "en investigación"), esperas explícitas en vez de implícitas, mocks para dependencias externas inestables. Tracking de flakiness rate en dashboard.'},
+  {q:'¿Cómo pruebas una nueva funcionalidad cuando no tienes documentación de requisitos?', diff:'mid', a:'Entrevisto a stakeholders: PO, developers, usuarios. Uso testing exploratorio con charters: "Explorar [área] con [herramienta/datos] para encontrar [información]". Comparo con comportamiento de sistemas similares o competidores. Documento mis asunciones y obtengo validación. Si hay APIs existentes, su contrato implícito es también un requisito. Este proceso a menudo revela que los requisitos existían en la cabeza de alguien, no escritos.'},
+  {q:'¿Qué métricas presentas al equipo vs a la dirección ejecutiva?', diff:'hard', a:'Al equipo: defect density por módulo, pass/fail rate por sprint, cobertura de tests, bugs por categoría (funcional/UI/performance), deuda técnica de tests. A dirección: % de releases sin incidentes críticos, tendencia de calidad entre versiones, ROI de automatización (tiempo ahorrado), costo estimado de bugs encontrados pre vs post producción, riesgo del release actual. El lenguaje cambia: del técnico al de negocio.'},
+  {q:'Describe cómo implementarías una estrategia de testing para un sistema de microservicios desde cero.', diff:'expert', a:'1) Unit tests en cada servicio con cobertura de branches críticos. 2) Contract tests (Pact) para verificar interfaces entre servicios. 3) Integration tests de componentes clave sin deployar todo. 4) API tests exhaustivos de cada servicio en aislamiento con mocks. 5) E2E tests mínimos para los flujos de negocio más críticos. 6) Performance tests de los servicios con más carga. 7) Observabilidad en producción (logs, trazas, métricas). Evitar el antipatrón de solo E2E tests que crean suites frágiles y lentas.'},
+  {q:'¿Cómo construyes una cultura de calidad en un equipo donde QA es visto como un "blocker"?', diff:'expert', a:'Cambio el narrative: QA no "encuentra problemas", sino que "reduce riesgos de negocio". Involucro a developers en el proceso: 3-amigos (PO+Dev+QA) en refinamiento, pair testing, revisión de casos de prueba juntos. Comparto métricas de valor: bugs evitados en producción, tiempo ahorrado. Hago QA más visible y colaborativo, menos "caja negra al final". Enseño técnicas de testing a developers para que prevengan en vez de corregir. El objetivo: toda la calidad es responsabilidad del equipo, no del QA.'},
+];
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const ST = {
+  cur: 'home',
+  done: JSON.parse(localStorage.getItem('qapro_done')||'[]'),
+  examDone: JSON.parse(localStorage.getItem('qapro_exam')||'false'),
+  examScore: +localStorage.getItem('qapro_exscore')||0,
+};
+
+function save(){
+  localStorage.setItem('qapro_done', JSON.stringify(ST.done));
+  localStorage.setItem('qapro_exam', JSON.stringify(ST.examDone));
+  localStorage.setItem('qapro_exscore', ST.examScore);
+}
+
+function pct(){
+  const total = MODS.filter(m=>!m.isExam).length;
+  return Math.round(ST.done.length/total*100);
+}
+
+// ══════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════
+function renderSb(){
+  const el = document.getElementById('sbNav');
+  let h = '<div class="nav-group-label">Módulos de estudio</div>';
+  MODS.forEach(m=>{
+    const done = ST.done.includes(m.id);
+    const active = ST.cur === m.id;
+    let cls = 'nav-item';
+    if(active) cls+=' active';
+    if(done) cls+=' done';
+    h += `<div class="${cls}" onclick="showMod('${m.id}')">
+      <div class="ni-dot"></div>
+      <div class="ni-label">${m.icon} ${m.label}</div>
+      <span class="ni-tag">${done?'✓':m.tag}</span>
+    </div>`;
+  });
+  el.innerHTML = h;
+  const p = pct();
+  document.getElementById('gPct').textContent = p+'%';
+  document.getElementById('gBar').style.width = p+'%';
+}
+
+// ══════════════════════════════════════════════
+// ROUTER
+// ══════════════════════════════════════════════
+function showMod(id){
+  ST.cur = id;
+  renderSb();
+  const m = MODS.find(x=>x.id===id);
+  document.getElementById('tbCrumb').innerHTML = `QA PRO / <span>${m.label}</span>`;
+  const c = document.getElementById('content');
+  c.style.animation = 'none';
+  c.offsetHeight;
+  c.style.animation = 'fadeUp .35s ease';
+  c.innerHTML = '';
+  const renders = {home:renderHome, istqb:renderISTQB, functional:renderFunctional, api:renderAPI, metrics:renderMetrics, scenarios:renderScenarios, behavioral:renderBehavioral, keywords:renderKeywords, interview:renderInterview, exam:renderExam};
+  if(renders[id]) renders[id]();
+  if(QUIZZES[id] && QUIZZES[id].length) renderQuiz(id);
+  closeSb(); window.scrollTo(0,0);
+}
+
+function markDone(id){
+  if(!ST.done.includes(id)){ ST.done.push(id); save(); renderSb(); }
+}
+
+function nextMod(id){
+  const ids = MODS.filter(m=>!m.isExam).map(m=>m.id);
+  const i = ids.indexOf(id);
+  return i < ids.length-1 ? ids[i+1] : null;
+}
+
+// ══════════════════════════════════════════════
+// MODULES
+// ══════════════════════════════════════════════
+
+function renderHome(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow">
+      <span class="eyebrow-tag">QA PRO ACADEMY</span>
+      <span class="eyebrow-level">Senior Level</span>
+    </div>
+    <h1 class="mod-title">BIENVENIDO<br>QA <span class="hl">SENIOR</span></h1>
+    <p class="mod-desc">Plataforma de preparación profesional integral para QAs con experiencia. Teoría avanzada ISTQB, API Testing profundo, métricas reales, escenarios de entrevista y simulacro de examen de 20 preguntas.</p>
+    <div class="mod-meta">
+      <div class="meta-item">📚 <span>8 módulos de estudio</span></div>
+      <div class="meta-item">🧩 <span>35+ preguntas de quiz</span></div>
+      <div class="meta-item">💼 <span>7 preguntas de entrevista</span></div>
+      <div class="meta-item">🎯 <span>4 casos de escenario</span></div>
+      <div class="meta-item">🔑 <span>24 keywords críticas</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:24px">
+      ${[
+        ['📋','ISTQB Avanzado','7 principios, niveles, técnicas avanzadas, glosario completo','istqb'],
+        ['⚙️','Testing Funcional','BVA avanzado, State Transition, Decision Tables, cobertura','functional'],
+        ['🔌','API Testing Profundo','REST avanzado, seguridad, contract testing, mocks','api'],
+        ['📊','Métricas & Reporting','DRE, MTTD, defect density, reporting ejecutivo','metrics'],
+        ['🎯','Casos de Escenario','Situaciones reales de entrevista técnica con respuestas modelo','scenarios'],
+        ['🧠','Behavioral','Método STAR, conflictos, liderazgo, decisiones difíciles','behavioral'],
+        ['🔑','Keywords & Glosario','24 términos clave con definiciones profesionales','keywords'],
+        ['💼','Preguntas de Entrevista','7 preguntas reales con respuestas senior-level','interview'],
+      ].map(([ico,title,desc,id])=>`
+        <div class="card" style="cursor:pointer" onclick="showMod('${id}')">
+          <div style="font-size:24px;margin-bottom:8px">${ico}</div>
+          <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px">${title}</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.5">${desc}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="card card-cyan">
+      <div class="card-title">🎓 Tu progreso actual</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-family:var(--font-display);font-size:48px;color:var(--cyan);letter-spacing:2px">${pct()}%</div>
+        <div style="flex:1">
+          <div class="pbar" style="height:8px"><div class="pbar-fill" style="width:${pct()}%"></div></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;font-family:var(--font-mono)">${ST.done.length} de ${MODS.filter(m=>!m.isExam).length} módulos completados</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderISTQB(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 01</span><span class="eyebrow-level">ISTQB Foundation + Advanced</span></div>
+    <h1 class="mod-title">ISTQB <span class="hl">AVANZADO</span></h1>
+    <p class="mod-desc">Los 7 principios en profundidad, niveles de prueba, tipos, técnicas de caja negra y blanca, y glosario certificado ISTQB.</p>
+    <div class="divider"></div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📜 Los 7 Principios — Análisis Profundo</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Principio</th><th>Significado real para Senior QA</th><th>Aplicación práctica</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-cyan">1</span></td><td>Testing shows presence of defects</td><td>El testing reduce incertidumbre pero no puede probar ausencia total de bugs (Dijkstra)</td><td>Nunca garantices "libre de bugs", di "probado según el alcance acordado"</td></tr>
+            <tr><td><span class="pill p-cyan">2</span></td><td>Exhaustive testing is impossible</td><td>La cantidad de combinaciones es matemáticamente infinita para cualquier sistema real</td><td>Justifica tu selección de casos con Risk-Based Testing y técnicas de diseño</td></tr>
+            <tr><td><span class="pill p-cyan">3</span></td><td>Early testing (Shift Left)</td><td>El costo de corrección aumenta exponencialmente con cada fase. Detectar en reqs es 100x más barato que en producción</td><td>Involúcrate en el 3-amigos, revisa user stories antes del sprint</td></tr>
+            <tr><td><span class="pill p-cyan">4</span></td><td>Defect Clustering</td><td>Regla 80/20: 80% de defectos en 20% de módulos. Guía la priorización del esfuerzo de testing</td><td>Analiza historiales de defectos para identificar módulos de alto riesgo</td></tr>
+            <tr><td><span class="pill p-cyan">5</span></td><td>Pesticide Paradox</td><td>Los tests antiguos pierden efectividad porque el sistema y los tipos de defectos evolucionan</td><td>Rota y actualiza el regression suite, añade tests para nuevos escenarios</td></tr>
+            <tr><td><span class="pill p-cyan">6</span></td><td>Testing is context-dependent</td><td>No existe un proceso universal de testing. El contexto (dominio, riesgo, metodología) define el approach</td><td>Adapta el proceso: testing de software médico ≠ testing de app de música</td></tr>
+            <tr><td><span class="pill p-cyan">7</span></td><td>Absence-of-errors fallacy</td><td>Un sistema puede pasar todos los tests y ser inútil para el usuario si los reqs estaban equivocados</td><td>Involúcra al usuario en UAT, valida valor de negocio no solo funcionalidad técnica</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🔬 Técnicas de Diseño de Casos — Nivel Senior</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="card card-cyan" style="margin-bottom:10px">
+          <div class="card-title">🔲 Equivalence Partitioning (EP)</div>
+          <p>Divide el dominio de entrada en clases donde se espera el mismo comportamiento. Asume que probar uno de la clase prueba todos.</p>
+          <div class="code"><span class="cm">// Campo: edad de conductor (18-70 para seguro estándar)</span>
+<span class="key">Clase inválida inferior:</span>  &lt;18   → probar: <span class="num">10</span>
+<span class="key">Clase válida:</span>              18-70  → probar: <span class="num">40</span>
+<span class="key">Clase inválida superior:</span>  &gt;70   → probar: <span class="num">80</span>
+<span class="cm">// Total: 3 tests en vez de ~60 posibles valores</span></div>
+        </div>
+        <div class="card card-green" style="margin-bottom:10px">
+          <div class="card-title">📏 Boundary Value Analysis (BVA)</div>
+          <p>Los errores se concentran en los límites. BVA de 2 puntos: en el límite y fuera. BVA de 3 puntos: debajo, en y encima del límite.</p>
+          <div class="code"><span class="cm">// Campo: descuento (1-50%)</span>
+<span class="key">BVA 3 puntos — límite inferior:</span>
+  <span class="num">0</span>   → inválido (justo debajo)
+  <span class="num">1</span>   → válido (en el límite)
+  <span class="num">2</span>   → válido (justo arriba)
+<span class="key">BVA 3 puntos — límite superior:</span>
+  <span class="num">49</span>  → válido (justo debajo)
+  <span class="num">50</span>  → válido (en el límite)
+  <span class="num">51</span>  → inválido (justo arriba)</div>
+        </div>
+        <div class="card card-amber" style="margin-bottom:10px">
+          <div class="card-title">📋 Decision Table Testing</div>
+          <p>Para lógica de negocio compleja con múltiples condiciones independientes. Garantiza cobertura de todas las combinaciones relevantes.</p>
+          <div class="code"><span class="cm">// Sistema de crédito</span>
+               C1    C2    C3    C4
+<span class="key">Score &gt;700</span>    T     T     F     F
+<span class="key">Ingreso &gt;3k</span>   T     F     T     F
+─────────────────────────────────────
+<span class="ok">Aprobado</span>      ✓     ✗     ✗     ✗
+<span class="err">Rechazado</span>     ✗     ✓     ✓     ✓</div>
+        </div>
+        <div class="card card-purple">
+          <div class="card-title">🔄 State Transition Testing</div>
+          <p>Modela sistemas basados en estados. Define: estados, transiciones, eventos y acciones. Cobertura: todas las transiciones válidas e inválidas.</p>
+          <div class="code"><span class="cm">// Proceso de pedido</span>
+PENDIENTE  ──[pago exitoso]──→  PROCESANDO
+PROCESANDO ──[enviar]────────→  ENVIADO
+ENVIADO    ──[entregar]──────→  ENTREGADO
+PROCESANDO ──[cancelar]──────→  CANCELADO
+ENVIADO    ──[rechazar]──────→  DEVOLUCION
+<span class="cm">// Test: intentar cancelar un pedido ENTREGADO → debe fallar</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🔍 Técnicas de Caja Blanca</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>Técnica</th><th>Qué mide</th><th>Fórmula</th><th>Cuándo usar</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-cyan">Statement Coverage</span></td><td>% de líneas ejecutadas</td><td>Líneas ejecutadas / Total líneas × 100</td><td>Baseline mínimo, poco robusto</td></tr>
+            <tr><td><span class="pill p-green">Branch Coverage</span></td><td>% de ramas ejecutadas (if/else)</td><td>Ramas ejecutadas / Total ramas × 100</td><td>Recomendado como mínimo estándar</td></tr>
+            <tr><td><span class="pill p-amber">Condition Coverage</span></td><td>% de condiciones atómicas evaluadas T y F</td><td>Condiciones T+F / Total condiciones×2</td><td>Lógica compleja con AND/OR</td></tr>
+            <tr><td><span class="pill p-purple">Path Coverage</span></td><td>Todos los caminos únicos del código</td><td>Exponencial — impracticable 100%</td><td>Funciones críticas pequeñas</td></tr>
+            <tr><td><span class="pill p-red">MC/DC</span></td><td>Cada condición afecta independientemente</td><td>Estándar DO-178C (aviación)</td><td>Software safety-critical</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🃏 Flashcards ISTQB — Glosario Clave</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Toca cada tarjeta para ver la definición.</p>
+        <div class="fc-grid">
+          ${[
+            ['Test Basis','La documentación que sirve como referencia para crear casos de prueba: specs, user stories, modelos de diseño.'],
+            ['Test Oracle','Fuente para determinar el resultado esperado de una prueba. Sin oracle, no puedes decidir si una prueba pasó.'],
+            ['Entry Criteria','Condiciones que deben cumplirse para comenzar una actividad de testing (ambiente listo, builds disponibles, datos preparados).'],
+            ['Exit Criteria','Condiciones que indican que el testing puede darse por completado (cobertura alcanzada, bugs críticos cerrados, etc.).'],
+            ['Traceability','Capacidad de rastrear un test case hasta el requisito que verifica y viceversa. Clave para análisis de impacto.'],
+            ['Risk-Based Testing','Estrategia que prioriza el esfuerzo de testing según la probabilidad × impacto de los defectos potenciales.'],
+            ['Test Debt','Deuda técnica en el área de testing: tests desactualizados, cobertura insuficiente, frameworks obsoletos.'],
+            ['Mutation Testing','Técnica para evaluar la calidad de los tests introduciendo cambios pequeños (mutaciones) en el código y verificando que los tests los detectan.'],
+          ].map(([t,d])=>`
+            <div class="fc" onclick="this.classList.toggle('flipped')">
+              <div class="fc-inner">
+                <div class="fc-front"><div class="fc-term">${t}</div><div class="fc-hint">Toca para definición →</div></div>
+                <div class="fc-back"><div class="fc-def">${d}</div></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFunctional(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 02</span><span class="eyebrow-level">Técnicas avanzadas</span></div>
+    <h1 class="mod-title">TESTING <span class="hl2">FUNCIONAL</span></h1>
+    <p class="mod-desc">Técnicas avanzadas de diseño, cobertura de tests, tipos de prueba y mejores prácticas para QA senior en proyectos reales.</p>
+    <div class="divider"></div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📝 Anatomía de un Caso de Prueba Profesional</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="code"><span class="cm">// Test Case: TC-CHECKOUT-023</span>
+<span class="key">Título:</span>        <span class="str">Checkout con cupón de descuento expirado</span>
+<span class="key">Módulo:</span>        Carrito / Checkout
+<span class="key">Prioridad:</span>     Alta | <span class="key">Tipo:</span> Funcional Negativo
+<span class="key">Precondiciones:</span>
+  1. Usuario autenticado con email: qa+test@empresa.com
+  2. Producto en carrito: SKU-4521 (precio: $99.00)
+  3. Cupón expirado en BD: PROMO2023 (expiró: 2023-12-31)
+
+<span class="key">Pasos:</span>
+  1. Ir a /checkout
+  2. En campo "Cupón" ingresar: <span class="str">"PROMO2023"</span>
+  3. Click en "Aplicar cupón"
+
+<span class="key">Resultado Esperado:</span>
+  - Status: 400 Bad Request (si validación en frontend llama API)
+  - Mensaje: <span class="str">"El cupón PROMO2023 ha expirado el 31/12/2023"</span>
+  - El total del carrito NO cambia ($99.00)
+  - El campo de cupón se limpia y muestra estado de error
+
+<span class="key">Resultado Actual:</span>  [se completa al ejecutar]
+<span class="key">Evidencia:</span>        [screenshot + console log]
+<span class="key">Trazabilidad:</span>     US-441, AC-3 "Cupones inválidos muestran mensaje descriptivo"</div>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🗂️ Tipos de Prueba — Referencia Completa</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>Tipo</th><th>Objetivo</th><th>Cuándo</th><th>Quién</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-cyan">Smoke</span></td><td>¿El build básico arranca?</td><td>Al recibir cada build</td><td>QA / CI automático</td></tr>
+            <tr><td><span class="pill p-cyan">Sanity</span></td><td>¿Este fix específico funciona?</td><td>Tras un hotfix o corrección</td><td>QA que reportó el bug</td></tr>
+            <tr><td><span class="pill p-green">Regression</span></td><td>¿Los cambios rompieron algo previo?</td><td>Antes de cada release</td><td>QA / Automatización</td></tr>
+            <tr><td><span class="pill p-green">Functional</span></td><td>¿El sistema hace lo que debe?</td><td>Cada sprint, nuevas features</td><td>QA</td></tr>
+            <tr><td><span class="pill p-amber">UAT</span></td><td>¿El usuario final acepta el sistema?</td><td>Pre-producción</td><td>Usuario final / PO</td></tr>
+            <tr><td><span class="pill p-amber">Exploratory</span></td><td>Descubrir bugs no anticipados</td><td>Nuevas features, post-release</td><td>QA senior</td></tr>
+            <tr><td><span class="pill p-purple">Performance</span></td><td>Rendimiento bajo carga</td><td>Antes de releases críticos</td><td>Performance QA</td></tr>
+            <tr><td><span class="pill p-red">Security</span></td><td>Vulnerabilidades y exposición</td><td>Periódico + cambios arquitectura</td><td>Security QA / Pen tester</td></tr>
+            <tr><td><span class="pill p-red">Accessibility</span></td><td>Cumplimiento WCAG</td><td>Features de UI</td><td>QA + Diseño</td></tr>
+          </tbody>
+        </table>
+        <div class="tip-box tip-amber" style="margin-top:12px">
+          <span class="tip-label">⚡ Diferencia clave Smoke vs Sanity</span>
+          <strong>Smoke:</strong> ¿el sistema en general funciona? (amplio, superficial). <strong>Sanity:</strong> ¿esta corrección específica funciona? (estrecho, profundo). Son complementarios, no sustitutos.
+        </div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🎲 Pairwise Testing — Técnica Avanzada</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:12px">
+          Para sistemas con muchas variables combinables. La mayoría de defectos son activados por la interacción de 2 parámetros (no de 3 o más). Pairwise garantiza que cada par de valores se prueba al menos una vez.
+        </p>
+        <div class="code"><span class="cm">// Búsqueda avanzada: 4 filtros × 3 valores = 3^4 = 81 combinaciones</span>
+<span class="key">Pairwise reduce a ~9 tests cubriendo todos los pares:</span>
+
+Browser: Chrome | Firefox | Safari
+OS:      Win    | Mac     | Linux
+Lang:    ES     | EN      | PT
+Role:    Admin  | User    | Guest
+
+<span class="cm">// Herramientas: PICT (Microsoft), Hexawise, pairwiseJS</span>
+<span class="cm">// Resultado: de 81 → 9 tests con cobertura equivalente de pares</span></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🧪 Testing Pyramid & Anti-patterns</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="code"><span class="cm">// Testing Pyramid (Mike Cohn)</span>
+         ▲ E2E Tests (10%) — lentos, frágiles, costosos
+        ▲ ▲ Integration Tests (20%) — servicios, APIs
+       ▲ ▲ ▲ Unit Tests (70%) — rápidos, confiables, baratos
+
+<span class="cm">// Anti-pattern: Ice Cream Cone (el más común en equipos sin QA)</span>
+       ▲ Unit Tests (5%) — casi ninguno
+      ▲ ▲ Integration Tests (15%)
+     ▲ ▲ ▲ E2E Tests (80%) — suite lenta, frágil, alto mantenimiento
+<span class="err">Resultado: suite que falla constantemente, nadie confía en ella</span></div>
+        <div class="tip-box tip-green" style="margin-top:12px">
+          <span class="tip-label">💡 Honeycomb de Spotify</span>
+          Para microservicios: más integration tests que unit tests, muy pocos E2E. Las APIs son las interfaces naturales de test.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAPI(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 03</span><span class="eyebrow-level">REST · Seguridad · Contract Testing</span></div>
+    <h1 class="mod-title">API TESTING <span class="hl">PROFUNDO</span></h1>
+    <p class="mod-desc">REST avanzado, idempotencia, autenticación, seguridad (OWASP), Contract Testing, mocks, y estrategia de automatización de APIs.</p>
+    <div class="divider"></div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📡 HTTP Methods — Propiedades Avanzadas</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>Método</th><th>CRUD</th><th>Idempotente</th><th>Safe</th><th>Request Body</th><th>Uso correcto</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-green">GET</span></td><td>Read</td><td>✅</td><td>✅</td><td>❌</td><td>Leer recursos, nunca modificar</td></tr>
+            <tr><td><span class="pill p-cyan">POST</span></td><td>Create</td><td>❌</td><td>❌</td><td>✅</td><td>Crear recursos, acciones no idempotentes</td></tr>
+            <tr><td><span class="pill p-amber">PUT</span></td><td>Replace</td><td>✅</td><td>❌</td><td>✅</td><td>Reemplazar recurso completo</td></tr>
+            <tr><td><span class="pill p-amber">PATCH</span></td><td>Update</td><td>⚠️ Depende</td><td>❌</td><td>✅</td><td>Actualización parcial del recurso</td></tr>
+            <tr><td><span class="pill p-red">DELETE</span></td><td>Delete</td><td>✅</td><td>❌</td><td>Opcional</td><td>Eliminar recurso, 204 en éxito</td></tr>
+            <tr><td><span class="pill p-blue">HEAD</span></td><td>Meta</td><td>✅</td><td>✅</td><td>❌</td><td>Verificar existencia sin traer body</td></tr>
+            <tr><td><span class="pill p-blue">OPTIONS</span></td><td>CORS</td><td>✅</td><td>✅</td><td>❌</td><td>CORS preflight, ver métodos permitidos</td></tr>
+          </tbody>
+        </table>
+        <div class="tip-box tip-cyan" style="margin-top:12px">
+          <span class="tip-label">⚡ Pregunta de entrevista frecuente</span>
+          "¿Cuál es la diferencia entre PUT y PATCH?" — PUT reemplaza el recurso completo (si omites un campo, se borra). PATCH solo modifica los campos enviados. PUT es idempotente. PATCH puede no serlo dependiendo de la implementación.
+        </div>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📊 Status Codes — Referencia Completa</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="status-grid">
+          <div class="sc sc2"><div class="sc-code">200</div><div class="sc-name">OK</div><div class="sc-desc">Éxito general en GET, PUT, PATCH</div></div>
+          <div class="sc sc2"><div class="sc-code">201</div><div class="sc-name">Created</div><div class="sc-desc">Recurso creado — POST exitoso</div></div>
+          <div class="sc sc2"><div class="sc-code">204</div><div class="sc-name">No Content</div><div class="sc-desc">Éxito sin body — DELETE típico</div></div>
+          <div class="sc sc2"><div class="sc-code">206</div><div class="sc-name">Partial</div><div class="sc-desc">Respuesta parcial — paginación</div></div>
+          <div class="sc sc3"><div class="sc-code">301</div><div class="sc-name">Moved</div><div class="sc-desc">Redirección permanente</div></div>
+          <div class="sc sc3"><div class="sc-code">304</div><div class="sc-name">Not Modified</div><div class="sc-desc">Usar caché — ETag match</div></div>
+          <div class="sc sc4"><div class="sc-code">400</div><div class="sc-name">Bad Request</div><div class="sc-desc">Solicitud malformada</div></div>
+          <div class="sc sc4"><div class="sc-code">401</div><div class="sc-name">Unauthorized</div><div class="sc-desc">Sin autenticación válida</div></div>
+          <div class="sc sc4"><div class="sc-code">403</div><div class="sc-name">Forbidden</div><div class="sc-desc">Autenticado, sin permisos</div></div>
+          <div class="sc sc4"><div class="sc-code">404</div><div class="sc-name">Not Found</div><div class="sc-desc">Recurso no existe</div></div>
+          <div class="sc sc4"><div class="sc-code">409</div><div class="sc-name">Conflict</div><div class="sc-desc">Estado conflictivo — duplicate</div></div>
+          <div class="sc sc4"><div class="sc-code">422</div><div class="sc-name">Unprocessable</div><div class="sc-desc">Validación falló (datos bien formados pero inválidos)</div></div>
+          <div class="sc sc4"><div class="sc-code">429</div><div class="sc-name">Rate Limit</div><div class="sc-desc">Demasiadas solicitudes</div></div>
+          <div class="sc sc5"><div class="sc-code">500</div><div class="sc-name">Server Error</div><div class="sc-desc">Error interno del servidor</div></div>
+          <div class="sc sc5"><div class="sc-code">502</div><div class="sc-name">Bad Gateway</div><div class="sc-desc">Proxy recibió respuesta inválida</div></div>
+          <div class="sc sc5"><div class="sc-code">503</div><div class="sc-name">Unavailable</div><div class="sc-desc">Servidor no disponible</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🔐 Seguridad en APIs — OWASP API Top 10</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Vulnerabilidad</th><th>Cómo testear</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-red">API1</span></td><td>IDOR (Broken Object Level Auth)</td><td>Crea 2 usuarios. Usa token de B para acceder a recursos de A: GET /orders/{id_de_A}</td></tr>
+            <tr><td><span class="pill p-red">API2</span></td><td>Broken Authentication</td><td>Token expirado (401?), token de otro ambiente, JWT sin firma</td></tr>
+            <tr><td><span class="pill p-red">API3</span></td><td>Broken Object Property Auth</td><td>¿Puedes leer/escribir campos sensibles que no debería ver tu rol?</td></tr>
+            <tr><td><span class="pill p-red">API4</span></td><td>Unrestricted Resource Consumption</td><td>¿Hay rate limiting? Envía 100 requests en 1 segundo</td></tr>
+            <tr><td><span class="pill p-red">API5</span></td><td>Broken Function Level Auth</td><td>¿Usuario normal puede acceder a endpoints de admin? /admin/users</td></tr>
+            <tr><td><span class="pill p-amber">API6</span></td><td>Unrestricted Access to Sensitive Flows</td><td>¿Puedes hacer bypass del flujo de pago o verificación?</td></tr>
+            <tr><td><span class="pill p-amber">API7</span></td><td>Server Side Request Forgery</td><td>Inyectar URLs internas en campos de URL del request body</td></tr>
+            <tr><td><span class="pill p-amber">API8</span></td><td>Security Misconfiguration</td><td>Verificar headers de seguridad, CORS permisivo, debug info expuesta</td></tr>
+          </tbody>
+        </table>
+        <div class="code" style="margin-top:12px">
+<span class="cm">// IDOR Test en Postman — Ejemplo práctico</span>
+<span class="cm">// 1. Login usuario A → obtener token_A</span>
+<span class="cm">// 2. Crear orden con usuario A → obtener order_id_A</span>
+<span class="cm">// 3. Login usuario B → obtener token_B</span>
+<span class="cm">// 4. Intentar acceder con token de B al recurso de A:</span>
+GET /api/v1/orders/<span class="num">{{order_id_A}}</span>
+Authorization: Bearer <span class="str">{{token_B}}</span>
+
+<span class="cm">// Resultado esperado: 403 Forbidden</span>
+<span class="err">// Resultado vulnerable: 200 OK con datos del usuario A</span></div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🤝 Contract Testing con Pact</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="code">
+<span class="cm">// Consumer-Driven Contract Testing</span>
+<span class="cm">// El consumidor define sus expectativas:</span>
+
+<span class="kw">const</span> { PactV3 } = <span class="fn">require</span>(<span class="str">'@pact-foundation/pact'</span>);
+
+<span class="kw">const</span> provider = <span class="kw">new</span> <span class="fn">PactV3</span>({
+  consumer: <span class="str">'FrontendApp'</span>,
+  provider: <span class="str">'UserService'</span>,
+});
+
+<span class="kw">await</span> provider.<span class="fn">addInteraction</span>({
+  state: <span class="str">'usuario 123 existe'</span>,
+  uponReceiving: <span class="str">'request para obtener usuario'</span>,
+  withRequest: { method: <span class="str">'GET'</span>, path: <span class="str">'/users/123'</span> },
+  willRespondWith: {
+    status: <span class="num">200</span>,
+    body: {
+      id: <span class="fn">integer</span>(<span class="num">123</span>),
+      name: <span class="fn">string</span>(<span class="str">'Juan'</span>),
+      email: <span class="fn">email</span>(<span class="str">'juan@test.com'</span>),
+    }
+  }
+});</div>
+        <div class="tip-box tip-green" style="margin-top:12px">
+          <span class="tip-label">💡 Cuándo usar Contract Testing</span>
+          Microservicios donde múltiples equipos consumen la misma API. Detecta breaking changes sin un ambiente de integración completo. El contrato se publica en Pact Broker y el proveedor lo verifica en su CI/CD.
+        </div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🎭 Mocks, Stubs y Test Doubles</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>Tipo</th><th>Comportamiento</th><th>Verifica interacciones</th><th>Uso típico</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill p-blue">Dummy</span></td><td>No hace nada, solo rellena</td><td>❌</td><td>Parámetros requeridos que no importan</td></tr>
+            <tr><td><span class="pill p-blue">Fake</span></td><td>Implementación simplificada funcional</td><td>❌</td><td>In-memory DB, servidor HTTP simple</td></tr>
+            <tr><td><span class="pill p-cyan">Stub</span></td><td>Devuelve respuestas predefinidas</td><td>❌</td><td>Simular respuestas de APIs externas</td></tr>
+            <tr><td><span class="pill p-amber">Spy</span></td><td>Wrapper del objeto real, graba llamadas</td><td>✅ Post-facto</td><td>Verificar que un método fue llamado</td></tr>
+            <tr><td><span class="pill p-green">Mock</span></td><td>Expectativas predefinidas + auto-verificación</td><td>✅ En tiempo de test</td><td>Verificar interacciones específicas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderMetrics(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 04</span><span class="eyebrow-level">KPIs · Reporting · Dashboard</span></div>
+    <h1 class="mod-title">MÉTRICAS & <span class="hl3">REPORTING</span></h1>
+    <p class="mod-desc">Las métricas que importan en QA senior: DRE, MTTD, defect density, cobertura y cómo presentar calidad al negocio con impacto.</p>
+    <div class="divider"></div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📊 KPIs Esenciales de QA</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-name">Defect Removal Efficiency</div>
+            <div class="metric-formula">DRE = (Pre-prod bugs / Total bugs) × 100</div>
+            <div class="metric-desc">Meta: &gt;95%. Mide qué tan efectivo es el proceso antes de llegar a producción.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Defect Density</div>
+            <div class="metric-formula">DD = Bugs / KLOC (o puntos función)</div>
+            <div class="metric-desc">Compara calidad entre módulos. Permite identificar áreas críticas.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Mean Time To Detect</div>
+            <div class="metric-formula">MTTD = Tiempo total / Nº defectos</div>
+            <div class="metric-desc">Tiempo promedio desde que se introduce un bug hasta que se detecta.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Mean Time To Repair</div>
+            <div class="metric-formula">MTTR = Tiempo detección → resolución</div>
+            <div class="metric-desc">Velocidad de respuesta del equipo ante defectos detectados.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Test Execution Rate</div>
+            <div class="metric-formula">TER = Ejecutados / Planificados × 100</div>
+            <div class="metric-desc">Mide si el plan de testing se está cumpliendo en tiempo.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Test Pass Rate</div>
+            <div class="metric-formula">TPR = Passed / Total ejecutados × 100</div>
+            <div class="metric-desc">Indicador de estabilidad del sistema en un punto del tiempo.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Automation Coverage</div>
+            <div class="metric-formula">AC = Tests auto / Total tests × 100</div>
+            <div class="metric-desc">% del suite que se ejecuta automáticamente. Meta: maximizar ROI.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Escaped Defect Rate</div>
+            <div class="metric-formula">EDR = Bugs en prod / Total bugs × 100</div>
+            <div class="metric-desc">Complemento del DRE. Cuántos bugs "se escapan" a producción.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">🧮 Cálculo Práctico de DRE</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="code">
+<span class="cm">// Escenario: Sprint Q3-W4</span>
+<span class="key">Bugs encontrados en testing:</span>   <span class="num">47</span>
+<span class="key">Bugs escapados a producción:</span>   <span class="num">3</span>
+<span class="key">Total bugs del período:</span>        <span class="num">50</span>
+
+<span class="key">DRE</span> = (47 / 50) × 100 = <span class="ok">94%</span>
+
+<span class="cm">// ¿Es bueno? DRE de 94% está justo debajo del 95% objetivo.</span>
+<span class="cm">// Los 3 bugs escapados causaron:</span>
+<span class="key">Bug #1:</span> Error en cálculo de IVA → ~200 facturas incorrectas
+<span class="key">Bug #2:</span> Imagen rota en homepage → impacto bajo
+<span class="key">Bug #3:</span> Timeout en pago con tarjeta AMEX → ~50 transacciones fallidas
+
+<span class="cm">// Conclusión: el DRE no distingue impacto. Complementar con severity.</span>
+<span class="key">DRE crítico</span> = (2 / 3) × 100 = <span class="err">66.7%</span>  <span class="cm">← más relevante para negocio</span></div>
+      </div>
+    </div>
+
+    <div class="acc open">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📈 Reporting Ejecutivo — Cómo Hablar el Idioma del Negocio</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <table class="tbl">
+          <thead><tr><th>Métrica Técnica</th><th>→</th><th>Traducción a Negocio</th></tr></thead>
+          <tbody>
+            <tr><td>DRE: 94%</td><td>→</td><td>Capturamos 47 de 50 defectos antes de llegar al cliente. 3 llegaron a producción.</td></tr>
+            <tr><td>Defect density: 3.2 bugs/KLOC en módulo de pagos</td><td>→</td><td>El módulo de pagos tiene 3x más bugs por tamaño que el promedio. Recomendamos priorizar su refactoring.</td></tr>
+            <tr><td>Automation coverage: 65%</td><td>→</td><td>Ejecutamos automáticamente el equivalente a 8 horas de testing manual en 12 minutos por release.</td></tr>
+            <tr><td>MTTD: 4.2 días</td><td>→</td><td>En promedio, tardamos 4 días en detectar un bug desde que se introduce. El objetivo Q4 es reducirlo a 2 días.</td></tr>
+            <tr><td>Pass rate: 78%</td><td>→</td><td>22% de los escenarios de prueba fallan. El sistema no está listo para producción bajo los criterios acordados.</td></tr>
+          </tbody>
+        </table>
+        <div class="tip-box tip-amber" style="margin-top:12px">
+          <span class="tip-label">💼 Tip de Senior QA</span>
+          Nunca presentes solo el número. Presenta: número → tendencia (mejor/peor que el sprint anterior) → acción recomendada. "El DRE bajó de 97% a 94% → análisis indica que el módulo de checkout requiere más cobertura de regresión."
+        </div>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head" onclick="tog(this)">
+        <div class="acc-title">📋 Estructura de un Test Report de Sprint</div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body">
+        <div class="code">
+<span class="key">QA SPRINT REPORT — Sprint 24 (Oct 14 - Oct 28)</span>
+═══════════════════════════════════════════════
+
+<span class="key">RESUMEN EJECUTIVO:</span>
+  Release Status: <span class="ok">APROBADO CON OBSERVACIONES</span>
+  Riesgo release: MEDIO (2 bugs abiertos P3)
+
+<span class="key">COBERTURA DE TESTING:</span>
+  User Stories testeadas:    18/20  (90%)
+  Criterios de aceptación:   54/58  (93%)
+  Tests ejecutados:         142/150  (94.7%)
+
+<span class="key">DEFECTOS:</span>
+  Total encontrados:    23
+  Cerrados:             21  (91.3%)
+  Abiertos P1/P2:        0  ✓
+  Abiertos P3/P4:        2  (aceptados para próximo sprint)
+
+<span class="key">DRE del sprint:</span> 96% (23 pre-prod / 0 post-prod conocidos)
+
+<span class="key">MÓDULOS CON MAYOR RIESGO:</span>
+  Checkout: 8 bugs (35% del total) → defect density 4.1/KLOC
+  Recomendación: incrementar cobertura en sprint 25
+
+<span class="key">CRITERIOS DE EXIT:</span>
+  ✓ 0 bugs críticos abiertos
+  ✓ Regression suite: 98% pass rate
+  ✓ Performance: p95 &lt; 800ms en checkout
+  ⚠ 2 bugs P3 aceptados por negocio (documentado)
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderScenarios(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 05</span><span class="eyebrow-level">Situaciones reales de entrevista</span></div>
+    <h1 class="mod-title">CASOS DE <span class="hl">ESCENARIO</span></h1>
+    <p class="mod-desc">Situaciones reales que te preguntarán en entrevistas senior. Analiza el escenario y luego descubre la respuesta modelo.</p>
+    <div class="divider"></div>
+    ${[
+      {
+        n:'01', title:'Bug crítico en producción — Black Friday',
+        sc:'Son las 11 PM del día anterior al Black Friday. El equipo de monitoreo detecta que el proceso de checkout falla para el 8% de los usuarios con tarjetas VISA. No hay el desarrollador responsable disponible. El fix estimado es de 4-6 horas. El tráfico esperado mañana es 10x el normal.',
+        bullets:['¿Cuál es tu primer paso?','¿Cómo decides entre rollback, workaround o esperar el fix?','¿Cómo comunicas la situación?','¿Qué documentas durante la crisis?'],
+        ans:`<strong>1. Triage inmediato (primeros 5 minutos):</strong> Cuantifica el impacto real: ¿8% de usuarios = cuántas transacciones/hora? ¿Solo VISA o también otras tarjetas? ¿Hay workaround (pagar con otra tarjeta)?<br><br>
+<strong>2. Escalada controlada:</strong> Activa el on-call protocol. Contacta al tech lead, Product Owner y si aplica, al manager. La comunicación debe ser: "tenemos X impacto, las opciones son A (rollback - 30 min), B (workaround - comunica a usuarios) o C (esperar fix - 4-6h). ¿Cuál elegiría el negocio?"<br><br>
+<strong>3. Decisión de rollback:</strong> Si hay rollback disponible y el impacto es en flujo crítico de revenue → rollback es casi siempre la respuesta. Rollback + comunicar que VISA funciona normalmente en 30 minutos es mejor que 6 horas de degradación.<br><br>
+<strong>4. Documentación en tiempo real:</strong> Timeline de eventos en un doc o thread de Slack: 23:05 detección, 23:12 escalada, 23:20 decisión, 23:50 rollback completado, etc.<br><br>
+<strong>5. Post-mortem (never-blame):</strong> Al día siguiente: RCA, por qué no se detectó en testing (¿faltaban tests de integración con VISA sandbox?), acciones preventivas.`
+      },
+      {
+        n:'02', title:'Aumentar automatización al 80% en 3 meses',
+        sc:'Tu nuevo manager te pide aumentar la cobertura de automatización del 25% actual al 80% en 3 meses. El equipo es de 3 QA juniors. El producto tiene ~400 casos de prueba documentados. Actualmente no hay framework establecido.',
+        bullets:['¿Aceptas el objetivo tal cual?','¿Cuál es tu estrategia?','¿Cómo priorizas qué automatizar?','¿Qué entregables concretos presentas?'],
+        ans:`<strong>Respuesta honesta primero:</strong> "El objetivo de 80% en 3 meses con el equipo actual no es realista sin ajustar el alcance. Puedo comprometer un 50-60% con cobertura en los flujos de mayor ROI, que es más valioso que 80% de tests de baja prioridad."<br><br>
+<strong>Estrategia (si se aprueba el alcance ajustado):</strong><br>
+Mes 1 — Fundamentos: elegir framework (Cypress/Playwright), crear estructura del proyecto, CI/CD pipeline básico, automatizar smoke tests (20-30 tests que corren en 10 min).<br><br>
+Mes 2 — Cobertura crítica: regression suite completo de los 5 flujos de negocio principales, API tests de endpoints core, data-driven tests para validaciones.<br><br>
+Mes 3 — Expansión: flujos secundarios, optimización de tiempos de ejecución, reporting, entrenamiento al equipo.<br><br>
+<strong>Criterio de priorización (ROI):</strong> Automatizar = alta frecuencia de ejecución + estabilidad del flujo + alto riesgo de negocio. NO automatizar = tests que cambian cada sprint, tests exploratorios, tests de usabilidad.`
+      },
+      {
+        n:'03', title:'70% de bugs vienen del mismo módulo',
+        sc:'Al analizar los últimos 3 sprints, descubres que el módulo de "Gestión de Inventario" generó el 68% de todos los defectos. El módulo tiene 3 años de antigüedad, fue escrito por un dev que ya no está en la empresa, y tiene baja cobertura de tests unitarios (15%).',
+        bullets:['¿Qué análisis realizas?','¿Cómo presentas esto al equipo?','¿Qué propones?','¿Cómo mides el impacto de tus acciones?'],
+        ans:`<strong>Análisis (datos primero):</strong> Defect density del módulo vs promedio. Clasificación de bugs: ¿son todos de la misma categoría? ¿lógica de negocio, integración, UI? ¿Complejidad ciclomática alta? ¿Deuda técnica documentada?<br><br>
+<strong>Presentación al equipo (sin culpas):</strong> "Los datos muestran que Inventario tiene defect density de 6.2 bugs/KLOC vs 1.8 de promedio. Este módulo representa el 68% de nuestro tiempo de fix y probablemente el 70% del riesgo de release. Aquí está el análisis completo."<br><br>
+<strong>Propuesta (opciones con trade-offs):</strong><br>
+Opción A (corto plazo): aumentar cobertura de tests en el módulo, pair testing QA+Dev en todas las historias relacionadas, quality gate: PR no mergeado sin tests.<br>
+Opción B (largo plazo): refactoring técnico planificado. Costo: X sprints de inversión. Beneficio esperado: reducción de 60% en defect density basado en módulos similares refactorizados.<br><br>
+<strong>Medición:</strong> Dashboard de defect density por módulo por sprint. Si en 2 sprints el módulo sigue igual, escalar a refactoring.`
+      },
+    ].map(s=>`
+      <div class="acc open" style="margin-bottom:12px">
+        <div class="acc-head" onclick="tog(this)">
+          <div class="acc-title"><span class="pill p-amber">S-${s.n}</span> ${s.title}</div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="scenario-box">
+            <span class="scenario-label">📋 ESCENARIO</span>
+            <div class="scenario-text">${s.sc}</div>
+          </div>
+          <div style="margin:12px 0">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Preguntas clave a responder:</div>
+            ${s.bullets.map(b=>`<div style="font-size:13px;color:var(--text2);padding:4px 0 4px 14px;border-left:2px solid var(--s4);margin:4px 0">› ${b}</div>`).join('')}
+          </div>
+          <div class="scenario-response">
+            <span class="sr-label">✅ RESPUESTA MODELO — Senior Level</span>
+            <div class="answer-text">${s.ans}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+  `;
+}
+
+function renderBehavioral(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 06</span><span class="eyebrow-level">Soft Skills · Liderazgo · Conflictos</span></div>
+    <h1 class="mod-title">ENTREVISTA <span class="hl2">BEHAVIORAL</span></h1>
+    <p class="mod-desc">El método STAR, las preguntas más frecuentes de behavioral, cómo manejar conflictos y demostrar liderazgo de QA en entrevistas.</p>
+    <div class="divider"></div>
+
+    <div class="card card-cyan">
+      <div class="card-title">⭐ El Método STAR — Tu Estructura de Respuesta</div>
+      <div class="star-grid">
+        <div class="star-card"><div class="star-letter" style="color:var(--cyan)">S</div><div class="star-word">Situación</div><p style="font-size:11px;color:var(--text3);margin-top:4px">El contexto. Dónde, cuándo, en qué empresa/proyecto.</p></div>
+        <div class="star-card"><div class="star-letter" style="color:var(--green)">T</div><div class="star-word">Tarea</div><p style="font-size:11px;color:var(--text3);margin-top:4px">Tu responsabilidad específica en esa situación.</p></div>
+        <div class="star-card"><div class="star-letter" style="color:var(--amber)">A</div><div class="star-word">Acción</div><p style="font-size:11px;color:var(--text3);margin-top:4px">Qué hiciste TÚ específicamente. Evita "nosotros".</p></div>
+        <div class="star-card"><div class="star-letter" style="color:var(--purple)">R</div><div class="star-word">Resultado</div><p style="font-size:11px;color:var(--text3);margin-top:4px">El impacto medible. Números, porcentajes, tiempo.</p></div>
+      </div>
+      <div class="tip-box tip-green" style="margin-top:12px">
+        <span class="tip-label">💡 El quinto elemento — After</span>
+        Los seniors agregan: ¿qué cambió después? ¿qué proceso mejoraste? ¿qué aprendiste? Demuestra pensamiento sistémico y ownership.
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    ${[
+      {q:'Cuéntame de un bug crítico que encontraste y cómo lo manejaste.', tag:'Experiencia técnica',
+       ans:`S: "En [empresa], estábamos 2 días antes del lanzamiento de una campaña de pagos en cuotas para Black Friday."<br>
+T: "Era el QA líder responsable de la certificación del módulo de checkout."<br>
+A: "Durante una prueba de regresión encontré que los pagos en 6 cuotas calculaban incorrectamente el interés cuando el monto superaba los $500. Documenté el bug con evidencia, reproduje en 3 ambientes diferentes para confirmar, notifiqué al equipo inmediatamente con un análisis de impacto: afectaba al 35% de los montos típicos de compra. Propuse un workaround: deshabilitar temporalmente la opción de 6 cuotas hasta tener el fix."<br>
+R: "El fix se implementó en 18 horas. Se realizó un micro-testing focalizado. El lanzamiento fue exitoso. Post-mortem identificó que faltaba un test específico para montos mayores a $500, que agregamos al regression suite."<br>
+After: "Propuse e implementé una revisión obligatoria de los cálculos financieros con datos reales de producción antes de cada release con componentes de pago."`},
+      {q:'¿Cómo manejas el conflicto cuando desarrollo dice que tu bug no es un bug?', tag:'Conflicto QA-Dev',
+       ans:`"Mi enfoque siempre es basado en evidencia, no en opiniones. Primero verifico que tengo toda la información: ¿hay una especificación clara? ¿un criterio de aceptación?<br><br>
+Si hay spec: 'Según el AC #3 de la US-441, el comportamiento esperado es X. Estoy observando Y. ¿Estamos de acuerdo en que la spec dice X?' Si el dev dice que la spec está mal, entonces la conversación es con el PO, no entre QA y Dev.<br><br>
+Si no hay spec: el bug revela un gap de definición. 'No tenemos una spec clara para esto. Propongo al PO que defina el comportamiento esperado. Mientras tanto, dejo el bug abierto como "definición pendiente".'<br><br>
+Nunca escalo como primera opción. Siempre busco resolución directa con evidencia. Si no hay acuerdo, involucro al PO como árbitro del comportamiento esperado, no como juez de quién tiene razón."`},
+      {q:'¿Cuándo fue la última vez que priorizaste calidad sobre velocidad?', tag:'Valores y criterio',
+       ans:`"En el Q2 del año pasado, el equipo quería liberar una feature de reportes financieros para cumplir una demo con un cliente potencial. Durante testing encontré inconsistencias en los cálculos de totales cuando había transacciones en múltiples monedas.<br><br>
+Era un viernes, la demo era el lunes. El equipo quería liberar 'para la demo y después corregimos'.<br><br>
+Mi posición: 'Si liberamos con bugs en los números financieros y el cliente los detecta en la demo, el daño es mayor que posponer. Propongo una demo con datos controlados que no activen el bug, y comunicar al cliente que la feature estará completa la siguiente semana con el fix.'<br><br>
+El manager aceptó. El cliente no notó nada en la demo. El fix se entregó el miércoles siguiente. Post-mortem: el manager reconoció que fue la decisión correcta."`,},
+    ].map(item=>`
+      <div class="interview-q open">
+        <div class="iq-question" onclick="this.parentElement.classList.toggle('open')">
+          <div class="iq-q-text">${item.q}</div>
+          <div class="iq-meta">
+            <span class="pill p-purple" style="font-size:10px">${item.tag}</span>
+          </div>
+          <span class="iq-toggle">▼</span>
+        </div>
+        <div class="iq-answer">
+          <div class="answer-label">✅ Respuesta modelo con STAR</div>
+          <div class="answer-text">${item.ans}</div>
+        </div>
+      </div>`).join('')}
+  `;
+}
+
+function renderKeywords(){
+  const c = document.getElementById('content');
+  const cats = [...new Set(KEYWORDS.map(k=>k.cat))];
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 07</span><span class="eyebrow-level">Glosario profesional</span></div>
+    <h1 class="mod-title">KEYWORDS <span class="hl">& GLOSARIO</span></h1>
+    <p class="mod-desc">Los 24 términos clave que todo QA Senior debe dominar. Pasa el cursor o toca para ver la definición completa. Estas palabras aparecen constantemente en entrevistas técnicas.</p>
+    <div class="divider"></div>
+    ${cats.map(cat=>`
+      <div class="acc open">
+        <div class="acc-head" onclick="tog(this)">
+          <div class="acc-title">🏷️ ${cat}</div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="kw-grid">
+            ${KEYWORDS.filter(k=>k.cat===cat).map(k=>`
+              <div class="kw-chip">
+                ${k.term}
+                <div class="kw-chip-def"><strong style="color:var(--cyan)">${k.term}</strong><br><br>${k.def}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`).join('')}
+
+    <div class="divider"></div>
+    <div class="card card-cyan">
+      <div class="card-title">💡 Cómo usar estas keywords en entrevistas</div>
+      <p>No solo memorices la definición. Prepara para cada término: una situación real donde lo aplicaste, un ejemplo concreto y por qué es importante. Los entrevistadores detectan inmediatamente si solo recitas definiciones sin contexto real.</p>
+    </div>
+  `;
+}
+
+function renderInterview(){
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Módulo 08</span><span class="eyebrow-level">Preguntas reales · Respuestas Senior</span></div>
+    <h1 class="mod-title">PREGUNTAS DE <span class="hl3">ENTREVISTA</span></h1>
+    <p class="mod-desc">7 preguntas reales de entrevistas senior de QA con respuestas de nivel profesional. Expande cada pregunta para ver la respuesta modelo completa.</p>
+    <div class="divider"></div>
+    ${INTERVIEW_QS.map((iq,i)=>`
+      <div class="interview-q">
+        <div class="iq-question" onclick="this.parentElement.classList.toggle('open')">
+          <div class="iq-q-text">${iq.q}</div>
+          <div class="iq-meta">
+            <span class="iq-diff diff-${iq.diff}">${iq.diff.toUpperCase()}</span>
+          </div>
+          <span class="iq-toggle">▼</span>
+        </div>
+        <div class="iq-answer">
+          <div class="answer-label">✅ Respuesta modelo — Senior Level</div>
+          <div class="answer-text">${iq.a}</div>
+        </div>
+      </div>`).join('')}
+  `;
+}
+
+// ══════════════════════════════════════════════
+// QUIZ ENGINE
+// ══════════════════════════════════════════════
+function renderQuiz(modId){
+  const qs = QUIZZES[modId];
+  if(!qs || !qs.length) return;
+  const c = document.getElementById('content');
+  const wrap = document.createElement('div');
+  wrap.className = 'quiz-wrap';
+  let st = {cur:0, score:0, ans:false};
+  const L = ['A','B','C','D'];
+
+  function draw(){
+    const q = qs[st.cur];
+    wrap.innerHTML = `
+      <div class="quiz-hdr">
+        <div class="quiz-ttl">🧩 Quiz del módulo</div>
+        <div class="quiz-ctr">${st.cur+1} / ${qs.length}</div>
+      </div>
+      <div class="quiz-dots">${qs.map((_,i)=>`<div class="qdot ${i<st.cur?'done':i===st.cur?'cur':''}"></div>`).join('')}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-opts" id="qO">
+        ${q.opts.map((o,i)=>`
+          <div class="qopt" onclick="qAns(${i},${q.c})" data-i="${i}">
+            <div class="opt-lt">${L[i]}</div><span>${o}</span>
+          </div>`).join('')}
+      </div>
+      <div class="q-fb" id="qFb"></div>
+      <div class="q-actions">
+        <button class="btn btn-ghost" id="qN" style="display:none" onclick="qNext()">${st.cur+1>=qs.length?'✅ Finalizar':'Siguiente →'}</button>
+      </div>`;
+  }
+
+  window.qAns = function(idx, correct){
+    if(st.ans) return; st.ans=true;
+    const opts = wrap.querySelectorAll('.qopt');
+    opts.forEach(o=>o.classList.add('dis'));
+    opts[idx].classList.add(idx===correct?'cor':'wrg');
+    if(idx!==correct) opts[correct].classList.add('cor');
+    if(idx===correct) st.score++;
+    const fb = wrap.querySelector('#qFb');
+    fb.textContent = qs[st.cur].fb;
+    fb.className = `q-fb show ${idx===correct?'fb-ok':'fb-no'}`;
+    wrap.querySelector('#qN').style.display='block';
+  };
+
+  window.qNext = function(){
+    st.cur++; st.ans=false;
+    if(st.cur>=qs.length){
+      const p = Math.round(st.score/qs.length*100);
+      wrap.innerHTML = `
+        <div class="result-wrap">
+          <div style="font-size:13px;color:var(--text3);font-family:var(--font-mono)">RESULTADO DEL QUIZ</div>
+          <div class="result-score" style="color:${p>=80?'var(--green)':p>=60?'var(--amber)':'var(--red)'}">${st.score}/${qs.length}</div>
+          <div class="result-bar"><div class="result-fill" style="width:${p}%"></div></div>
+          <div class="result-msg">${p>=80?'🏆 Dominio completo del módulo.':p>=60?'👍 Buen resultado. Revisa los conceptos fallados.':'📖 Repasa el módulo antes de continuar.'}</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+            <button class="btn btn-ghost" onclick="showMod('${modId}')">🔄 Reintentar</button>
+            ${nextMod(modId)?`<button class="btn btn-green" onclick="completeNext('${modId}')">Siguiente módulo →</button>`:''}
+          </div>
+        </div>`;
+      markDone(modId);
+    } else draw();
+  };
+
+  draw();
+  c.appendChild(wrap);
+}
+
+window.completeNext = function(id){
+  markDone(id);
+  const n = nextMod(id);
+  if(n) showMod(n);
+};
+
+// ══════════════════════════════════════════════
+// FINAL EXAM
+// ══════════════════════════════════════════════
+let EX = {cur:0,score:0,qs:[]};
+
+function renderExam(){
+  const c = document.getElementById('content');
+  if(ST.examDone){
+    const p = Math.round(ST.examScore/EXAM_QS.length*100);
+    let msg='', clr='';
+    if(p>=80){msg='🏆 ISTQB Ready — Preparación excelente';clr='var(--green)';}
+    else if(p>=60){msg='👍 Aprobado — Refuerza las áreas falladas';clr='var(--amber)';}
+    else{msg='📖 Repasa los módulos y vuelve a intentarlo';clr='var(--red)';}
+    c.innerHTML = `
+      <div class="mod-eyebrow"><span class="eyebrow-tag">Examen Final</span></div>
+      <h1 class="mod-title">RESULTADO <span class="hl">FINAL</span></h1>
+      <div class="quiz-wrap" style="margin-top:24px">
+        <div class="result-wrap">
+          <div style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">TU PUNTUACIÓN</div>
+          <div class="result-score" style="color:${clr}">${ST.examScore}/${EXAM_QS.length}</div>
+          <div class="result-bar"><div class="result-fill" style="width:${p}%"></div></div>
+          <div style="font-family:var(--font-display);font-size:32px;letter-spacing:2px;color:${clr};margin:8px 0">${p}%</div>
+          <div class="result-msg">${msg}</div>
+          <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            ${p>=80?'<span class="pill p-green">🏆 QA Champion</span>':''}
+            ${p>=60?'<span class="pill p-cyan">📋 ISTQB Ready</span>':''}
+            <span class="pill p-amber">🎓 Examen Completado</span>
+          </div>
+          <div style="margin-top:20px">
+            <button class="btn btn-cyan" onclick="startExam()">🔄 Repetir Examen</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Examen Final</span><span class="eyebrow-level">Simulacro ISTQB + Senior</span></div>
+    <h1 class="mod-title">EXAMEN <span class="hl">FINAL</span></h1>
+    <p class="mod-desc">20 preguntas que cubren todos los módulos. Nivel Senior. Necesitas 60% para aprobar, 80% para estar ISTQB-ready.</p>
+    <div class="exam-intro-grid">
+      <div class="exam-stat"><div class="es-num">20</div><div class="es-lbl">Preguntas</div></div>
+      <div class="exam-stat"><div class="es-num">60%</div><div class="es-lbl">Para aprobar</div></div>
+      <div class="exam-stat"><div class="es-num">80%</div><div class="es-lbl">ISTQB Ready</div></div>
+      <div class="exam-stat"><div class="es-num">∞</div><div class="es-lbl">Intentos</div></div>
+    </div>
+    <div style="text-align:center;padding:24px 0">
+      <button class="btn btn-cyan" style="font-size:16px;padding:16px 40px" onclick="startExam()">🚀 Comenzar Examen</button>
+    </div>`;
+}
+
+function startExam(){
+  ST.examDone=false; save();
+  EX = {cur:0, score:0, qs:[...EXAM_QS].sort(()=>Math.random()-.5)};
+  drawExamQ();
+}
+
+function drawExamQ(){
+  const c = document.getElementById('content');
+  if(EX.cur>=EX.qs.length){
+    ST.examDone=true; ST.examScore=EX.score;
+    if(!ST.done.includes('exam')) ST.done.push('exam');
+    save(); renderSb(); renderExam(); return;
+  }
+  const q = EX.qs[EX.cur];
+  const L=['A','B','C','D'];
+  c.innerHTML = `
+    <div class="mod-eyebrow"><span class="eyebrow-tag">Examen Final</span></div>
+    <h1 class="mod-title">PREGUNTA <span class="hl">${EX.cur+1}</span><span style="font-size:28px;letter-spacing:1px;color:var(--text3)"> / ${EX.qs.length}</span></h1>
+    <div class="quiz-wrap" style="margin-top:16px">
+      <div class="quiz-dots">${EX.qs.map((_,i)=>`<div class="qdot ${i<EX.cur?'done':i===EX.cur?'cur':''}"></div>`).join('')}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-opts" id="eO">
+        ${q.opts.map((o,i)=>`
+          <div class="qopt" onclick="eAns(${i},${q.c})" data-i="${i}">
+            <div class="opt-lt">${L[i]}</div><span>${o}</span>
+          </div>`).join('')}
+      </div>
+      <div class="q-fb" id="eFb"></div>
+      <div class="q-actions">
+        <button class="btn btn-cyan" id="eN" style="display:none" onclick="eNext()">${EX.cur+1>=EX.qs.length?'🏁 Ver Resultado':'Siguiente →'}</button>
+      </div>
+    </div>`;
+}
+
+window.eAns = function(idx,correct){
+  const opts = document.querySelectorAll('#eO .qopt');
+  opts.forEach(o=>o.classList.add('dis'));
+  opts[idx].classList.add(idx===correct?'cor':'wrg');
+  if(idx!==correct) opts[correct].classList.add('cor');
+  if(idx===correct) EX.score++;
+  const fb = document.getElementById('eFb');
+  fb.textContent = EX.qs[EX.cur].fb;
+  fb.className = `q-fb show ${idx===correct?'fb-ok':'fb-no'}`;
+  document.getElementById('eN').style.display='block';
+};
+
+window.eNext = function(){ EX.cur++; drawExamQ(); };
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+window.tog = function(h){ h.closest('.acc').classList.toggle('open'); };
+function toggleSb(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSb(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+renderSb();
+showMod('home');
+</script>
+</body>
+</html>
